@@ -1,0 +1,46 @@
+﻿
+#nullable enable
+#nullable disable warnings
+
+using SFCTOFC.DailySalesPlanManagementApplication.Features.Contacts.Caching;
+
+namespace SFCTOFC.DailySalesPlanManagementApplication.Features.Contacts.Commands.Delete;
+
+public class DeleteContactCommand:  ICacheInvalidatorRequest<Result>
+{
+  public int[] Id {  get; }
+  public string CacheKey => ContactCacheKey.GetAllCacheKey;
+  public IEnumerable<string>? Tags => ContactCacheKey.Tags;
+  public DeleteContactCommand(int[] id)
+  {
+    Id = id;
+  }
+}
+
+public class DeleteContactCommandHandler : 
+             IRequestHandler<DeleteContactCommand, Result>
+
+{
+    private readonly IApplicationDbContextFactory _dbContextFactory;
+    public DeleteContactCommandHandler(
+        IApplicationDbContextFactory dbContextFactory
+    )
+    {
+        _dbContextFactory = dbContextFactory;
+    }
+    public async Task<Result> Handle(DeleteContactCommand request, CancellationToken cancellationToken)
+    {
+        await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+        var items = await db.Contacts.Where(x => request.Id.Contains(x.Id)).ToListAsync(cancellationToken);
+        foreach (var item in items)
+        {
+		    // raise a delete domain event
+			item.AddDomainEvent(new ContactDeletedEvent(item));
+            db.Contacts.Remove(item);
+        }
+        await db.SaveChangesAsync(cancellationToken);
+        return await Result.SuccessAsync();
+    }
+
+}
+

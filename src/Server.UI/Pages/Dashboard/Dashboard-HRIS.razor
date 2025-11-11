@@ -1,0 +1,489 @@
+﻿@page "/Dashboard-HRIS"
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Pages.Dashboard.Components
+@using MudBlazor.Utilities
+@inject IStringLocalizer<Dashboard> L
+
+<PageTitle>@Title</PageTitle>
+
+<ErrorBoundary>
+    <MudTabs Outlined="true" Position="Position.Top" Rounded="true" Border="true" Elevation="6" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabPanel Text="@L["DASHBOARD"]">
+            <MudContainer MaxWidth="MaxWidth.False" Class="pa-6">
+                <MudGrid Spacing="3" Justify="Justify.FlexStart" Class="mb-6">
+                    <MudItem xs="12" sm="8" md="6">
+                        <MudCard Class="pa-6 mb-3" Style="background-color:#0F52BA; color:white;" Elevation="6">
+                            <MudGrid>
+                                <!-- Clock (Left Side) -->
+                                <MudItem xs="12" sm="6" class="d-flex flex-column align-center justify-center">
+                                    <MudChip T="string" Class="mb-2" Color="Color.Primary" Style="min-width:220px; justify-content:center;">
+                                        <b>Schedule for: @GetTimeInZone(_timeZones[0]).ToString("dddd, MMM dd yyyy")</b>
+                                    </MudChip>
+                                    <MudDivider Class="mb-2" />
+
+                                    <svg width="220" height="220" viewBox="0 0 200 200">
+                                        <!-- Clock face with gradient -->
+                                        <defs>
+                                            <radialGradient id="clockFace" cx="50%" cy="50%" r="50%">
+                                                <stop offset="85%" style="stop-color:#f9f9f9; stop-opacity:1" />
+                                                <stop offset="100%" style="stop-color:#ddd; stop-opacity:1" />
+                                            </radialGradient>
+                                        </defs>
+                                        <circle cx="100" cy="100" r="95" stroke="#1976d2" stroke-width="4" fill="url(#clockFace)" />
+
+                                        <!-- Hour tick marks -->
+                                        @for (int i = 0; i < 12; i++)
+                                        {
+                                            var angle = i * 30; // 360 / 12
+                                            var x1 = 100 + 80 * Math.Sin(Math.PI * angle / 180);
+                                            var y1 = 100 - 80 * Math.Cos(Math.PI * angle / 180);
+                                            var x2 = 100 + 90 * Math.Sin(Math.PI * angle / 180);
+                                            var y2 = 100 - 90 * Math.Cos(Math.PI * angle / 180);
+
+                                            <line x1="@x1" y1="@y1" x2="@x2" y2="@y2" stroke="black" stroke-width="3" />
+                                        }
+
+                                        <!-- Minute tick marks -->
+                                        @for (int i = 0; i < 60; i++)
+                                        {
+                                            if (i % 5 != 0) // skip where hour ticks already exist
+                                            {
+                                                var angle = i * 6;
+                                                var x1 = 100 + 85 * Math.Sin(Math.PI * angle / 180);
+                                                var y1 = 100 - 85 * Math.Cos(Math.PI * angle / 180);
+                                                var x2 = 100 + 90 * Math.Sin(Math.PI * angle / 180);
+                                                var y2 = 100 - 90 * Math.Cos(Math.PI * angle / 180);
+
+                                                <line x1="@x1" y1="@y1" x2="@x2" y2="@y2" stroke="black" stroke-width="1" />
+                                            }
+                                        }
+
+                                        <!-- Numbers 1-12 -->
+                                        @for (int i = 1; i <= 12; i++)
+                                        {
+                                            var angle = i * 30;
+                                            var x = 100 + 70 * Math.Sin(Math.PI * angle / 180);
+                                            var y = 105 - 70 * Math.Cos(Math.PI * angle / 180);
+                                        }
+
+                                        <!-- Hour hand -->
+                                        <line x1="100" y1="100"
+                                              x2="@(_hourHandX)" y2="@(_hourHandY)"
+                                              stroke="black" stroke-width="6" stroke-linecap="round" />
+
+                                        <!-- Minute hand -->
+                                        <line x1="100" y1="100"
+                                              x2="@(_minuteHandX)" y2="@(_minuteHandY)"
+                                              stroke="black" stroke-width="4" stroke-linecap="round" />
+
+                                        <!-- Second hand -->
+                                        <line x1="100" y1="100"
+                                              x2="@(_secondHandX)" y2="@(_secondHandY)"
+                                              stroke="red" stroke-width="2" stroke-linecap="round" />
+
+                                        <!-- Clock center -->
+                                        <circle cx="100" cy="100" r="5" fill="black" />
+                                        <circle cx="100" cy="100" r="3" fill="white" />
+                                    </svg>
+
+                                    <!-- Digital time -->
+                                    <MudText Typo="Typo.h6" Class="mt-2 font-mono">
+                                        @_time.ToString("HH:mm:ss")
+                                    </MudText>
+                                </MudItem>
+
+
+                                <!-- Schedule Info (Right Side) -->
+                                <MudItem xs="12" sm="6" class="d-flex flex-column align-center justify-center">
+                                    <MudText Typo="Typo.h3" Class="mb-2" Style="color:white; font-weight:bold;">NO SCHEDULE</MudText>
+                                    <MudText Typo="Typo.h5" Class="mb-4">REGULAR</MudText>
+
+                                    <!-- Button row -->
+                                    <div class="d-flex flex-row align-center justify-center gap-2">
+                                        <MudButton StartIcon="@Icons.Material.Outlined.ArrowBack"
+                                                   Style="border:2px solid #1976d2; border-radius:8px; box-shadow:2px 2px 5px rgba(0,0,0,0.2);">
+                                        </MudButton>
+
+                                        <MudButton StartIcon="@Icons.Material.Outlined.ArrowForward"
+                                                   Style="border:2px solid #1976d2; border-radius:8px; box-shadow:2px 2px 5px rgba(0,0,0,0.2);">
+                                        </MudButton>
+
+                                        <MudButton StartIcon="@Icons.Material.Outlined.CalendarMonth"
+                                                   Style="border:2px solid #1976d2; border-radius:8px; box-shadow:2px 2px 5px rgba(0,0,0,0.2);">
+                                            VIEW CALENDAR
+                                        </MudButton>
+                                    </div>
+                                </MudItem>
+                            </MudGrid>
+                        </MudCard>
+
+                        <div class="d-flex flex-row gap-3 justify-center mb-3">
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#263238; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>YESTERDAY</b>
+                                    </MudChip>
+                                    <MudText Typo="Typo.h4" Class="mt-2" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                        NO SCHEDULE
+                                    </MudText>
+                                </div>
+                            </MudCard>
+
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#ffa500; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>TOMORROW</b>
+                                    </MudChip>
+                                    <MudText Typo="Typo.h4" Class="mt-2" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                        NO SCHEDULE
+                                    </MudText>
+                                </div>
+                            </MudCard>
+                        </div>
+                    </MudItem>
+                        
+                    <MudItem xs="12" sm="8" md="6">
+                        <div class="d-flex flex-row gap-3 justify-center mb-3">
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#4b369d; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>@MonthToDateText</b>
+                                    </MudChip>
+
+                                    <div class="d-flex align-center justify-center mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Medium" Class="mr-2" />
+                                        <MudText Typo="Typo.h4" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                            TOTAL TARDINESS (MTD)
+                                        </MudText>
+                                    </div>
+                                </div>
+                            </MudCard>
+
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#424242; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>@YearToDateText</b>
+                                    </MudChip>
+
+                                    <div class="d-flex align-center justify-center mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Medium" Class="mr-2" />
+                                        <MudText Typo="Typo.h4" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                            TOTAL TARDINESS (YTD)
+                                        </MudText>
+                                    </div>
+                                </div>
+                            </MudCard>
+                        </div>
+
+                        <div class="d-flex flex-row gap-3 justify-center mb-3">
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#312121; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>@MonthToDateText</b>
+                                    </MudChip>
+
+                                    <div class="d-flex align-center justify-center mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.Bed" Size="Size.Medium" Class="mr-2" />
+                                        <MudText Typo="Typo.h4" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                            TOTAL ABSENCES (MTD)
+                                        </MudText>
+                                    </div>
+                                </div>
+                            </MudCard>
+
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#70369d; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>@YearToDateText</b>
+                                    </MudChip>
+
+                                    <div class="d-flex align-center justify-center mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.Bed" Size="Size.Medium" Class="mr-2" />
+                                        <MudText Typo="Typo.h4" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                            TOTAL ABSENCES (YTD)
+                                        </MudText>
+                                    </div>
+                                </div>
+                            </MudCard>
+                        </div>
+
+                        <div class="d-flex flex-row gap-3 justify-center mb-4">
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#79c314; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>@MonthToDateText</b>
+                                    </MudChip>
+
+                                    <div class="d-flex align-center justify-center mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.PunchClock" Size="Size.Medium" Class="mr-2" />
+                                        <MudText Typo="Typo.h4" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                            TOTAL OVERTIME (MTD)
+                                        </MudText>
+                                    </div>
+                                </div>
+                            </MudCard>
+
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#724242; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>@YearToDateText</b>
+                                    </MudChip>
+
+                                    <div class="d-flex align-center justify-center mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.PunchClock" Size="Size.Medium" Class="mr-2" />
+                                        <MudText Typo="Typo.h4" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                            TOTAL OVERTIME (YTD)
+                                        </MudText>
+                                    </div>
+                                </div>
+                            </MudCard>
+                        </div>
+
+                        <div class="d-flex flex-row gap-3 justify-center mb-3">
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#124242; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>@MonthToDateText</b>
+                                    </MudChip>
+
+                                    <div class="d-flex align-center justify-center mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.Airlines" Size="Size.Medium" Class="mr-2" />
+                                        <MudText Typo="Typo.h4" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                            VACATION LEAVE BALANCE
+                                        </MudText>
+                                    </div>
+                                </div>
+                            </MudCard>
+
+                            <MudCard Class="pa-3 flex-1" Style="background-color:#e81416; color:white;" Elevation="6">
+                                <div class="d-flex flex-column align-center mb-2">
+                                    <MudChip T="string" Color="Color.Secondary"
+                                             Style="min-width:200px; justify-content:center;">
+                                        <b>@YearToDateText</b>
+                                    </MudChip>
+
+                                    <div class="d-flex align-center justify-center mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.LocalHospital" Size="Size.Medium" Class="mr-2" />
+                                        <MudText Typo="Typo.h4" Align="Align.Center" Style="color:white; font-weight:bold;">
+                                            SICK LEAVE BALANCE
+                                        </MudText>
+                                    </div>
+                                </div>
+                            </MudCard>
+                        </div>
+                    </MudItem>
+
+                    <MudDialog @bind-IsVisible="_showDialog" MaxWidth="MaxWidth.Small">
+                        <DialogContent>
+                            <MudText Typo="Typo.h6">@_selected?.Title</MudText>
+                            <MudText Typo="Typo.body2" Class="mt-2">
+                                <b>Type:</b> @_selected?.Type <br />
+                                <b>Date Posted:</b> @_selected?.DatePosted.ToString("dd-MMM-yyyy") <br />
+                                <b>Description:</b> This is a placeholder description for <i>@_selected?.Title</i>.
+                            </MudText>
+                        </DialogContent>
+                        <DialogActions>
+                            <MudButton Color="Color.Primary" OnClick="() => _showDialog = false">Close</MudButton>
+                        </DialogActions>
+                    </MudDialog>
+                </MudGrid>
+
+                <MudGrid Style="display:flex;">
+                    <MudItem xs="12" sm="6">
+                        <MudCard Class="pa-6 mb-4" Elevation="6">
+                            <div class="d-flex justify-between align-center mb-4">
+                                <MudChip T="string" Color="Color.Primary" Style="min-width:150px; justify-content:center;"><b>MEMORANDUM AND ANNOUNCEMENTS</b></MudChip>
+                            </div>
+
+                            <MudTable Items="_memos" Hover="true" Dense="true" Bordered="true" Striped="true" Elevation="3"
+                                      RowClick="OnRowClick" Breakpoint="Breakpoint.Sm">
+                                <HeaderContent>
+                                    <MudTh Style="text-align:center; width:80px;">#</MudTh>
+                                    <MudTh>📄 Title</MudTh>
+                                    <MudTh>📂 Type</MudTh>
+                                    <MudTh>🗓 Date Posted</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="ID">@context.Id</MudTd>
+                                    <MudTd DataLabel="Title">@context.Title</MudTd>
+                                    <MudTd DataLabel="Type">@context.Type</MudTd>
+                                    <MudTd DataLabel="Date Posted">@context.DatePosted.ToString("dd-MMM-yyyy")</MudTd>
+                                </RowTemplate>
+                                <PagerContent>
+                                    <MudTablePager />
+                                </PagerContent>
+                            </MudTable>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6">
+                        <MudCard Class="pa-6 mb-4" Elevation="6">
+                            <div class="d-flex justify-between align-center mb-4">
+                                <MudChip T="string" Color="Color.Primary" Style="min-width:150px; justify-content:center;"><b>PULSE SURVEY</b></MudChip>
+                            </div>
+
+                            <MudTable Items="_pulseSurveys" Hover="true" Dense="true" Bordered="true" Striped="true" Elevation="3"
+                                      RowClick="OnSurveyRowClick" Breakpoint="Breakpoint.Sm">
+                                <HeaderContent>
+                                    <MudTh Style="text-align:center; width:80px;">#</MudTh>
+                                    <MudTh>📄 Title</MudTh>
+                                    <MudTh>📂 Category</MudTh>
+                                    <MudTh>🗓 Date Posted</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="ID">@context.Id</MudTd>
+                                    <MudTd DataLabel="Title">@context.Title</MudTd>
+                                    <MudTd DataLabel="Category">@context.Category</MudTd>
+                                    <MudTd DataLabel="Date Posted">@context.DatePosted.ToString("dd-MMM-yyyy")</MudTd>
+                                </RowTemplate>
+                                <PagerContent>
+                                    <MudTablePager />
+                                </PagerContent>
+                            </MudTable>
+                        </MudCard>
+                    </MudItem>
+                </MudGrid>
+            </MudContainer>
+
+        </MudTabPanel>
+    </MudTabs>
+</ErrorBoundary>
+
+
+@code {
+
+    public string Title { get; set; } = "Dashboard";
+
+    private DateTime _time = DateTime.Now;
+    private System.Threading.Timer? _timer;
+    private List<TimeZoneInfo> _timeZones = new();
+    private readonly bool IsMobile = false;
+ 
+    private double _secondHandX, _secondHandY;
+    private double _minuteHandX, _minuteHandY;
+    private double _hourHandX, _hourHandY;
+
+    private string MonthToDateText => $"{new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1):MMM d} - {DateTime.Now:MMM d, yyyy}";
+    private string YearToDateText => $"{new DateTime(DateTime.Now.Year, 1, 1):MMM d} - {DateTime.Now:MMM d, yyyy}";
+
+    protected override void OnInitialized()
+    {
+        Title = L["Dashboard"];
+
+        // Add time zones you want to display
+        _timeZones = new()
+        {
+            TimeZoneInfo.FindSystemTimeZoneById("Singapore Standard Time"), // Manila
+            TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time"),  // New York
+            TimeZoneInfo.FindSystemTimeZoneById("GMT Standard Time"),      // London
+        };
+
+        UpdateClockHands();
+
+        _timer = new System.Threading.Timer(UpdateTime, null, 0, 1000);
+    }
+
+    private void UpdateTime(object? state)
+    {
+        InvokeAsync(() =>
+        {
+            _time = DateTime.Now;
+            StateHasChanged();
+            UpdateClockHands();
+        });
+    }
+
+    private DateTime GetTimeInZone(TimeZoneInfo tz)
+    {
+        return TimeZoneInfo.ConvertTime(_time, tz);
+    }
+
+    private void UpdateClockHands()
+    {
+        double secAngle = (_time.Second / 60.0) * 360;
+        double minAngle = ((_time.Minute + _time.Second / 60.0) / 60.0) * 360;
+        double hourAngle = ((_time.Hour % 12 + _time.Minute / 60.0) / 12.0) * 360;
+
+        // convert to radians
+        double secRad = (Math.PI / 180) * (secAngle - 90);
+        double minRad = (Math.PI / 180) * (minAngle - 90);
+        double hourRad = (Math.PI / 180) * (hourAngle - 90);
+
+        // lengths
+        int secLen = 80;
+        int minLen = 70;
+        int hourLen = 50;
+
+        _secondHandX = 100 + secLen * Math.Cos(secRad);
+        _secondHandY = 100 + secLen * Math.Sin(secRad);
+
+        _minuteHandX = 100 + minLen * Math.Cos(minRad);
+        _minuteHandY = 100 + minLen * Math.Sin(minRad);
+
+        _hourHandX = 100 + hourLen * Math.Cos(hourRad);
+        _hourHandY = 100 + hourLen * Math.Sin(hourRad);
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+
+    private MemoAnnouncement? _selected;
+    private bool _showDialog;
+
+    // Sample model
+    public class MemoAnnouncement
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Type { get; set; } // e.g., Memo or Announcement
+        public DateTime DatePosted { get; set; }
+    }
+
+    // Sample data
+    private List<MemoAnnouncement> _memos = new()
+    {
+        new MemoAnnouncement { Id = 1, Title = "Holiday Schedule Update", Type = "Announcement", DatePosted = DateTime.Now.AddDays(-1) },
+        new MemoAnnouncement { Id = 2, Title = "New HR Policies", Type = "Memorandum", DatePosted = DateTime.Now.AddDays(-3) },
+        new MemoAnnouncement { Id = 3, Title = "Team Building Event", Type = "Announcement", DatePosted = DateTime.Now.AddDays(-5) },
+        new MemoAnnouncement { Id = 4, Title = "System Maintenance", Type = "Memorandum", DatePosted = DateTime.Now.AddDays(-7) }
+    };
+
+    private void OnRowClick(TableRowClickEventArgs<MemoAnnouncement> args)
+    {
+        _selected = args.Item;
+        _showDialog = true;
+    }
+
+
+    public class PulseSurveyDto
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;  // e.g., Engagement, Well-being
+        public DateTime DatePosted { get; set; }
+    }
+
+    private List<PulseSurveyDto> _pulseSurveys = new()
+    {
+        new PulseSurveyDto { Id = 1, Title = "Employee Engagement Q1", Category = "Engagement", DatePosted = DateTime.Now.AddDays(-12) },
+        new PulseSurveyDto { Id = 2, Title = "Workload Balance Check", Category = "Well-being", DatePosted = DateTime.Now.AddDays(-30) },
+        new PulseSurveyDto { Id = 3, Title = "Manager Feedback Survey", Category = "Leadership", DatePosted = DateTime.Now.AddDays(-45) },
+        new PulseSurveyDto { Id = 4, Title = "Remote Work Satisfaction", Category = "Flexibility", DatePosted = DateTime.Now.AddDays(-60) }
+    };
+
+    private void OnSurveyRowClick(TableRowClickEventArgs<PulseSurveyDto> args)
+    {
+        var selected = args.Item;
+        Console.WriteLine($"Clicked Survey: {selected.Title}");
+    }
+}

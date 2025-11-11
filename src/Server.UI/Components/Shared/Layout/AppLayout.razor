@@ -1,0 +1,152 @@
+﻿@layout MainLayout
+@inherits LayoutComponentBase
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Interfaces.Identity
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Extensions
+@inject IUserProfileState UserProfileState
+@inject LayoutService LayoutService
+@implements IDisposable
+
+<style>
+
+    /* in site.css or app.css */
+    .mud-appbar {
+        z-index: 1300 !important; /* higher than Drawer (1100) */
+
+    }
+    .mud-toolbar-gutters {
+        padding-left: 0px !important;
+    }
+
+    /* 🔹 Makes AppBar shorter and denser */
+    .mud-appbar {
+        min-height: 45px !important;
+        height: 45px !important;
+        background-color: black !important;
+    }
+
+    /* 🔹 Reduces internal toolbar padding */
+    .mud-toolbar {
+        min-height: 45px !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    /* 🔹 Optional: reduce icon and text spacing */
+    .mud-toolbar-gutters {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+    }
+    .style-sidebar {
+        margin-bottom: 20px;
+        background-color: #e9e9e9;
+    }
+</style>
+
+<MudLayout>
+    <AuthorizeView>
+        <NotAuthorized>
+            <RedirectToLogin />
+        </NotAuthorized>
+        <Authorized>
+            <!-- 🔹 AppBar -->
+            <MudAppBar Elevation="1" Style="background-color: black; height:700px; min-height:60px;" 
+            Fixed="true" ClipMode="ClipMode.Always">
+                <HeaderMenu NavigationMenuDrawerOpen="_navigationMenuDrawerOpen"
+                            OpenSearchDialog="OpenSearchDialog"
+                            IsDarkMode="@LayoutService.IsDarkMode"
+                            ToggleNavigationMenuDrawer="ToggleNavigationMenuDrawer"
+                            RightToLeft="@LayoutService.IsRTL"
+                            RightToLeftToggle="LayoutService.ToggleRightToLeft"
+                            OnSettingClick="@(() => themeSettings?.OpenSetting())" />
+            </MudAppBar>
+
+
+            <!-- 🔹 Sidebar Drawer -->
+            <MudDrawer @bind-Open="_navigationMenuDrawerOpen"
+                       Anchor="Anchor.Start"
+                       Elevation="0"
+                       Variant="DrawerVariant.Mini"
+                       MiniWidth="45px"
+                       ClipMode="DrawerClipMode.Always"
+                       Class="style-sidebar">
+
+
+                <NavigationMenu DrawerOpen="_navigationMenuDrawerOpen"
+                                Roles="@(UserProfile?.AssignedRoles ?? [])"
+                                DrawerOpenChanged="NavigationMenuDrawerOpenChangedHandler"
+                                OnSettingClick="@(() => themeSettings?.OpenSetting())" />
+            </MudDrawer>
+
+
+            <!-- 🔹 Page content -->
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.ExtraLarge">
+                    <ErrorBoundary @ref="ErrorBoundary">
+                        <ChildContent>
+                            <CascadingValue Value="@UserProfile">
+                                @Body
+                            </CascadingValue>
+                        </ChildContent>
+                        <ErrorContent Context="exception">
+                            <CustomError Exception="exception"></CustomError>
+                        </ErrorContent>
+                    </ErrorBoundary>
+                </MudContainer>
+            </MudMainContent>
+
+            <ThemesMenu @ref="themeSettings" UserPreferences="@LayoutService.UserPreferences" UserPreferencesChanged="LayoutService.UpdateUserPreferences" />
+            <UserLoginState />
+        </Authorized>
+    </AuthorizeView>
+</MudLayout>
+
+@code {
+    private bool _commandPaletteOpen;
+    private bool _navigationMenuDrawerOpen = false;
+    private bool _themingDrawerOpen;
+    private UserProfile? UserProfile;
+    private ErrorBoundary? ErrorBoundary { set; get; }
+    private ThemesMenu? themeSettings { set; get; }
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await AuthState;
+        UserProfileState.Changed += OnUserProfileChanged;
+
+        var userId = state.User.GetUserId();
+        if (state.User.Identity?.IsAuthenticated == true && !string.IsNullOrEmpty(userId))
+        {
+            await UserProfileState.EnsureInitializedAsync(userId);
+            UserProfile = UserProfileState.Value;
+        }
+    }
+
+    public void Dispose() => UserProfileState.Changed -= OnUserProfileChanged;
+
+    protected override void OnParametersSet() => ResetBoundary();
+
+    private void OnUserProfileChanged(object? sender, UserProfile userProfile)
+    {
+        UserProfile = userProfile;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ResetBoundary() => ErrorBoundary?.Recover();
+
+    protected void NavigationMenuDrawerOpenChangedHandler(bool state) => _navigationMenuDrawerOpen = state;
+
+    protected void ToggleNavigationMenuDrawer() => _navigationMenuDrawerOpen = !_navigationMenuDrawerOpen;
+
+    private async Task OpenSearchDialog()
+    {
+        if (!_commandPaletteOpen)
+        {
+            var options = new DialogOptions { NoHeader = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+            var commandPalette = await DialogService.ShowAsync<SearchDialog>("", options);
+            _commandPaletteOpen = true;
+            await commandPalette.Result;
+            _commandPaletteOpen = false;
+        }
+    }
+}

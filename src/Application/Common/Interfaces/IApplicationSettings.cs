@@ -1,0 +1,11 @@
+﻿namespace SFCTOFC.DailySalesPlanManagementApplication.Common.Interfaces;
+
+public interface IApplicationSettings
+{
+    string App { get; set; }
+    string ApplicationUrl { get; set; }
+    string AppName { get; set; }
+    string Company { get; set; }
+    string Copyright { get; set; }
+    string Version { get; set; }
+}

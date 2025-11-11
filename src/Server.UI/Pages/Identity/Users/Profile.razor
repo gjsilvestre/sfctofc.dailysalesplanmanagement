@@ -1,0 +1,38 @@
+﻿@page "/user/profile"
+
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Pages.Identity.Users.Components
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Interfaces.Identity
+@inject IStringLocalizer<Profile> Localizer
+@inject IUserProfileState UserProfileState
+
+<PageTitle>@_title</PageTitle>
+
+<MudPaper Style="min-width:100%; min-height:100vh; max-width:100%; max-height:100vh; padding:16px;">
+    <MudTabs Outlined="true" Position="Position.Top" Rounded="true" Border="true" Elevation="6"
+             ApplyEffectsToContainer="true" Class="mt-8" PanelClass="pa-6">
+        <MudTabPanel Text="@Localizer["Profile"]">
+            <ProfileInformationTab />
+        </MudTabPanel>
+
+        <MudTabPanel Text="@Localizer["Change Password"]">
+            <ChangePasswordTab />
+        </MudTabPanel>
+
+        <MudTabPanel Text="@Localizer["Two-Factor Authentication"]">
+            <TwoFactorAuthTab />
+        </MudTabPanel>
+
+        <MudTabPanel Text="@Localizer["Org Chart"]">
+            <OrgChartTab />
+        </MudTabPanel>
+
+        <MudTabPanel Text="@Localizer["Login History"]">
+            <LoginHistoryTab />
+        </MudTabPanel>
+    </MudTabs>
+
+</MudPaper>
+
+@code {
+    private string _title => "Profile";
+}

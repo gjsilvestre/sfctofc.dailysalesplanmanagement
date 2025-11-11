@@ -1,0 +1,141 @@
+﻿@* userinfocard *@
+
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Security
+@using SFCTOFC.DailySalesPlanManagementApplication.Features.Identity.DTOs
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Interfaces.Identity
+@inject IStringLocalizer<UserInfoCard> L
+@inject IUserProfileState UserProfileState
+@implements IDisposable
+
+<div class="pa-4">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+        @if (UserProfile is null || string.IsNullOrEmpty(UserProfile.UserId))
+        {
+            <MudProgressCircular Size="Size.Small" Color="Color.Default" Indeterminate="true" />
+            <MudStack Justify="Justify.Center" Spacing="0" Style="flex: 1;">
+                <MudSkeleton Width="100px" Height="16px" />
+                <MudSkeleton Width="120px" Height="14px" />
+            </MudStack>
+        }
+        else
+        {
+            <MudMenu @ref="_menuRef"
+                     AnchorOrigin="Origin.TopRight"
+                     TransformOrigin="Origin.BottomRight"
+                     LockScroll="true"
+                     OpenMenuOnClick="false"
+                     OpenMenuOnHover="true">
+                <ActivatorContent>
+                    <MudAvatar Style="width: 25px; height: 25px; cursor: pointer;">
+                        @if (string.IsNullOrEmpty(UserProfile?.ProfilePictureDataUrl))
+                        {
+                            @(string.IsNullOrEmpty(UserProfile?.UserName) ? "" : UserProfile.UserName.First())
+                        }
+                        else
+                        {
+                            <MudImage Src="@UserProfile.ProfilePictureDataUrl"></MudImage>
+                        }
+                    </MudAvatar>
+                </ActivatorContent>
+
+                <ChildContent>
+                    <div style="min-width: 200px;"
+                         @onmouseover="() => SetMenuState(true)"
+                         @onmouseout="() => SetMenuState(false)">
+
+                        @if (UserProfile is not null)
+                        {
+                            <div class="mx-4 mt-2 mb-3">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudAvatar Style="width: 40px; height: 40px; cursor: pointer;">
+                                        @if (string.IsNullOrEmpty(UserProfile?.ProfilePictureDataUrl))
+                                        {
+                                            @(string.IsNullOrEmpty(UserProfile?.UserName) ? "" : UserProfile.UserName.First())
+                                        }
+                                        else
+                                        {
+                                            <MudImage Src="@UserProfile.ProfilePictureDataUrl" />
+                                        }
+                                    </MudAvatar>
+
+                                    <MudStack Spacing="0">
+                                        <MudText Typo="Typo.body2"
+                                                 Style="font-weight:500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                            @UserProfile.DisplayName (@UserProfile.DefaultRole)
+                                        </MudText>
+                                        <MudText Typo="Typo.body2"
+                                                 Class="mud-secondary-text"
+                                                 Style="font-weight: 500; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                            @UserProfile.Email
+                                        </MudText>
+                                    </MudStack>
+                                </MudStack>
+                            </div>
+                            <MudDivider Class="my-2" />
+                        }
+
+                        <MudMenuItem Href="/user/profile">
+                            <div class="d-flex align-center">
+                                <MudIcon Class="mx-2" Icon="@Icons.Material.Filled.Person" />
+                                <MudText>@L["Profile"]</MudText>
+                            </div>
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="OnSettingClick">
+                            <div class="d-flex align-center">
+                                <MudIcon Class="mx-2" Icon="@Icons.Material.Filled.Settings" />
+                                <MudText>@L["Settings"]</MudText>
+                            </div>
+                        </MudMenuItem>
+                        <MudDivider Class="my-2" />
+                        <div class="mx-4 mb-2">
+                            <form action="@IdentityComponentsEndpointRouteBuilderExtensions.Logout" method="post">
+                                <input type="hidden" name="ReturnUrl" value="/account/login" />
+                                <MudButton Color="Color.Primary"
+                                           ButtonType="ButtonType.Submit"
+                                           FullWidth="true"
+                                           StartIcon="@Icons.Material.Filled.Logout"
+                                           Variant="Variant.Outlined"
+                                           Size="Size.Small">
+                                    @L["Logout"]
+                                </MudButton>
+                            </form>
+                        </div>
+                    </div>
+                </ChildContent>
+            </MudMenu>
+
+
+        }
+    </MudStack>
+</div>
+
+
+@code {
+    [Parameter] public EventCallback<MouseEventArgs> OnSettingClick { get; set; }
+    private UserProfile UserProfile => UserProfileState.Value;
+
+    private MudMenu _menuRef;
+    private bool _isOpen;
+
+    private void SetMenuState(bool open)
+    {
+        _isOpen = open;
+        StateHasChanged();
+    }
+
+    protected override void OnInitialized()
+    {
+        UserProfileState.Changed += UserProfileState_OnChange;
+    }
+
+    public void Dispose()
+    {
+        UserProfileState.Changed -= UserProfileState_OnChange;
+    }
+
+    private async void UserProfileState_OnChange(object? sender, UserProfile userProfile)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+}
+

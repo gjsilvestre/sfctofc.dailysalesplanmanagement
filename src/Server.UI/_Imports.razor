@@ -1,0 +1,63 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using System.Reflection
+@using System.Text
+@using System.ComponentModel
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Services
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.Extensions.DependencyInjection
+@using Microsoft.Extensions.Configuration
+@using Microsoft.Extensions.Localization
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.JSInterop
+@using MudBlazor
+@using MediatR
+@using AutoMapper
+@using AutoMapper.QueryableExtensions
+@using FluentValidation;
+@using SFCTOFC.DailySalesPlanManagementDomain
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.ExceptionHandlers
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Extensions
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Interfaces
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Models
+@using SFCTOFC.DailySalesPlanManagementApplication.Features.Identity.DTOs
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Interfaces.Identity
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Security;
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Constants
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Models
+@using SFCTOFC.DailySalesPlanManagementServer.UI
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Shared
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Forms
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Breadcrumbs
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Autocompletes
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Dialogs
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Identity
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Localization
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Redirections
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Shared
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Shared.Themes
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Shared.Layout
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Services.Layout
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Extensions
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Services.JsInterop
+@using Severity=MudBlazor.Severity
+@using Color = MudBlazor.Color
+@inject IApplicationSettings ApplicationSettings
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject IAuthorizationService AuthService 
+@inject IValidationService Validator
+@inject IJSRuntime JS
+@inject IMediator Mediator
+@inject NavigationManager Navigation
+@inject DialogServiceHelper DialogServiceHelper
+@inject IPermissionService PermissionService
+@inject IPermissionHelper PermissionHelper
+@inject IMapper Mapper

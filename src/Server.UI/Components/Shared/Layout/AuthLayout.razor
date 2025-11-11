@@ -1,0 +1,105 @@
+﻿﻿@using SFCTOFC.DailySalesPlanManagementServer.UI.Themes
+@using Microsoft.AspNetCore.Components.Authorization
+@layout MainLayout
+@inherits LayoutComponentBase
+@inject IStringLocalizer<AuthLayout> L
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<style>
+    /* make all navmenu icons smaller */
+    .sidebar-navmenu .mud-icon-root {
+        font-size: 18px !important; /* default is 24px */
+    }
+
+    .sidebar-navmenu .mud-nav-link {
+        min-height: 36px !important; /* default ~48px */
+    }
+    /* Hide scrollbar sa sidebar navmenu */
+    .sidebar-navmenu {
+        overflow-y: hidden !important;
+    }
+
+    /* Optional: kung may MudDrawer wrapper */
+    .side-menu {
+        overflow-y: hidden !important;
+    }
+</style>
+@* heres theorginal *@
+<MudLayout>
+    <AuthorizeView>
+        <NotAuthorized>
+            <MudContainer MaxWidth="MaxWidth.False"
+                          Class="d-flex align-center justify-center"
+                          Style="height:100vh;
+                     width:100vw;
+                     background-image:url('/img/wallpaper/sfc_prod2.jpg');
+                     background-size:cover;
+                     background-position:center;">
+
+                <div class="d-flex" style="gap:32px; max-width:1200px; margin:auto;">
+                    <MudPaper Elevation="6" Class="pa-8" Style="width:400px; height:80vh;">
+                        @Body
+                    </MudPaper>
+                    <MudPaper Elevation="6" Class="pa-8" Style="width:700px; height:80vh;">
+                        <div class="d-flex flex-column" style="gap:20px; height:calc(100% - 20px);">
+                            <MudPaper Elevation="1" Class="overflow-hidden" Style="flex:2; border-radius:10px;">
+                                <img src="/img/resource.jpg"
+                                     alt="Announcement 1"
+                                     style="width:100%; height:100%; object-fit:cover; border-radius:10px;" />
+                            </MudPaper>
+                            <MudPaper Elevation="1" Class="overflow-hidden" Style="flex:1; border-radius:10px;">
+                                <img src="/img/resource1.jpg"
+                                     alt="Announcement 2"
+                                     style="width:100%; height:100%; object-fit:cover; border-radius:10px;" />
+                            </MudPaper>
+                        </div>
+                    </MudPaper>
+                    @* <MudPaper Elevation="6" Class="pa-8" Style="width:700px; height:80vh;">
+                       
+
+                        <div class="d-flex flex-column" style="gap:20px; height:calc(100% - 40px);">
+                        
+                            <MudPaper Elevation="1" Class="pa-4" Style="flex:2; border-radius:5px;">
+                                <MudText Typo="Typo.h6">Lorem Ipsum Wuhluh</MudText>
+                                <MudDivider Class="my-2" />
+                                <MudText Typo="Typo.body2">
+                                   lorem 
+                                </MudText>
+                            </MudPaper>
+
+                         
+                            <MudPaper Elevation="1" Class="pa-4" Style="flex:1; border-radius:5px;">
+                                <MudText Typo="Typo.h6">Quick Notes</MudText>
+                                <MudDivider Class="my-2" />
+                                <MudText Typo="Typo.body2">
+                                    Smaller section for notes or reminders.
+                                </MudText>
+                            </MudPaper>
+                        </div>
+                    </MudPaper> *@
+
+                </div>
+            </MudContainer>
+        </NotAuthorized>
+        <Authorized>
+            <MudText Typo="Typo.body2">@L["Welcome back! You are already logged in. Redirecting to the home page"]</MudText>
+        </Authorized>
+    </AuthorizeView>
+</MudLayout>
+
+
+@code
+{
+    protected override async Task OnInitializedAsync()
+    {
+        // Check if the user is already authenticated
+        var user = (await AuthenticationStateProvider.GetAuthenticationStateAsync()).User;
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+
+        await base.OnInitializedAsync();
+    }
+}

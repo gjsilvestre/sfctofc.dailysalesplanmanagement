@@ -1,0 +1,83 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <RootNamespace>SFCTOFC.DailySalesPlanManagementServer.UI</RootNamespace>
+        <AssemblyName>SFCTOFC.DailySalesPlanManagementServer.UI</AssemblyName>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <NoWarn>$(NoWarn);VSTHRD200</NoWarn>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <InvariantGlobalization>false</InvariantGlobalization>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <PreserveCompilationContext>true</PreserveCompilationContext>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <UserSecretsId>8118d19e-a6db-4446-bdb6-fa62b17f843d</UserSecretsId>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Pages\Contacts\**" />
+      <Compile Remove="Pages\Documents\**" />
+      <Compile Remove="Pages\Marketing\**" />
+      <Compile Remove="Pages\Production\**" />
+      <Compile Remove="Pages\References\NewFolder\**" />
+      <Compile Remove="Shared\**" />
+      <Content Remove="Pages\Contacts\**" />
+      <Content Remove="Pages\Documents\**" />
+      <Content Remove="Pages\Marketing\**" />
+      <Content Remove="Pages\Production\**" />
+      <Content Remove="Pages\References\NewFolder\**" />
+      <Content Remove="Shared\**" />
+      <EmbeddedResource Remove="Pages\Contacts\**" />
+      <EmbeddedResource Remove="Pages\Documents\**" />
+      <EmbeddedResource Remove="Pages\Marketing\**" />
+      <EmbeddedResource Remove="Pages\Production\**" />
+      <EmbeddedResource Remove="Pages\References\NewFolder\**" />
+      <EmbeddedResource Remove="Shared\**" />
+      <None Remove="Pages\Contacts\**" />
+      <None Remove="Pages\Documents\**" />
+      <None Remove="Pages\Marketing\**" />
+      <None Remove="Pages\Production\**" />
+      <None Remove="Pages\References\NewFolder\**" />
+      <None Remove="Shared\**" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />
+        <PackageReference Include="Hangfire.InMemory" Version="1.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.8" />
+        <PackageReference Include="MudBlazor" Version="8.11.0" />
+        <PackageReference Include="Blazor-ApexCharts" Version="6.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Migrators\Migrators.MSSQL\Migrators.MSSQL.csproj" />
+        <ProjectReference Include="..\Migrators\Migrators.PostgreSQL\Migrators.PostgreSQL.csproj" />
+        <ProjectReference Include="..\Migrators\Migrators.SqLite\Migrators.SqLite.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="Resources\EmailTemplates\_useractivation.cshtml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\EmailTemplates\_recoverypassword.cshtml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\EmailTemplates\_authenticatorcode.cshtml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
+        <EmbeddedResource Include="Resources\EmailTemplates\_welcome.cshtml">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </EmbeddedResource>
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="wwwroot\img\Icons\GSApps.png" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="wwwroot\img\NewFolder\" />
+    </ItemGroup>
+   
+</Project>

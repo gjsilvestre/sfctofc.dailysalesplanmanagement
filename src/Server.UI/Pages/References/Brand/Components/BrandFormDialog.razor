@@ -1,0 +1,131 @@
+﻿
+@using System.Collections.Immutable
+@using Image = SixLabors.ImageSharp.Image
+@using ResizeMode = SixLabors.ImageSharp.Processing.ResizeMode
+
+@using SFCTOFC.DailySalesPlanManagementApplication.Features.References.Brand.Command.AddEdit
+@using SFCTOFC.DailySalesPlanManagementDomain.Common.Enums
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Components.Fusion
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Services.JsInterop
+@using SixLabors.ImageSharp
+@using SixLabors.ImageSharp.Formats.Png
+@using SixLabors.ImageSharp.Processing
+@using Size = SixLabors.ImageSharp.Size
+
+@inject IStringLocalizer<Brands> L
+@* @inject IUploadService UploadService *@
+
+<MudDialog>
+    <DialogContent>
+        <ActiveUserSession PageComponent="@($"{nameof(BrandFormDialog)}/{_model.Id}")" />
+        <MudForm Model="@_model" @ref="@_form" Validation="@(Validator.ValidateValue(_model))">
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudTextField Label="@L["Brand Code"]" @bind-Value="_model.BrandCode"
+                                  For="@(() => _model.BrandCode)"
+                                  Required="true"
+                                  RequiredError="@L["BrandCode name is required!"]">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField Label="@L["Brand Name"]"
+                                  Lines="3"
+                                  For="@(() => _model.BrandName)"
+                                  @bind-Value="_model.BrandName">
+                    </MudTextField>
+                </MudItem>
+             
+             
+              
+               
+            </MudGrid>
+        </MudForm>
+
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">@ConstantString.Cancel</MudButton>
+        @* <MudLoadingButton Loading="@_saveingnew" OnClick="SaveAndNew">@ConstantString.SaveAndNew</MudLoadingButton> *@
+        <MudLoadingButton Loading="@_saving" OnClick="Submit">@ConstantString.Save</MudLoadingButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [EditorRequired][Parameter] public AddEditBrandCommand _model { get; set; } = default!;
+
+    [Parameter] public Action? Refresh { get; set; }
+
+    private MudForm? _form;
+    private bool _saving;
+    private bool _saveingnew;
+    private bool _uploading;
+
+
+
+    private async Task Submit()
+    {
+        try
+        {
+            _saving = true;
+            await _form!.Validate().ConfigureAwait(false);
+
+            if (!_form!.IsValid)
+                return;
+
+   
+            var result = await Mediator.Send(_model);
+            result.Match(
+            data =>
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+                Snackbar.Add(ConstantString.SaveSuccess, Severity.Info);
+            },
+            errors =>
+            {
+                Snackbar.Add(errors, Severity.Error);
+            });
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task SaveAndNew()
+    {
+        try
+        {
+            _saveingnew = true;
+            await _form!.Validate().ConfigureAwait(false);
+            if (!_form!.IsValid)
+                return;
+            var result = await Mediator.Send(_model);
+            result.Match(
+            data =>
+            {
+                Snackbar.Add(ConstantString.SaveSuccess, Severity.Info);
+                Refresh?.Invoke();
+                _model = new AddEditBrandCommand();
+            },
+            errors =>
+            {
+                Snackbar.Add(result.ErrorMessage, Severity.Error);
+            });
+        }
+        finally
+        {
+            _saveingnew = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+    private async Task OnDownloadFile(string? str)
+    {
+        var fileURL = str;
+        await new Fancybox(JS).Preview(str ?? string.Empty, []);
+    }
+}

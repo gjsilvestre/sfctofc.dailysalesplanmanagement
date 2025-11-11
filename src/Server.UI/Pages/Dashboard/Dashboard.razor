@@ -1,0 +1,129 @@
+﻿@page "/"
+@using SFCTOFC.DailySalesPlanManagementServer.UI.Pages.Dashboard.Components
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Security
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Interfaces.Identity
+@using SFCTOFC.DailySalesPlanManagementApplication.Features.Tenants.DTOs
+@using SFCTOFC.DailySalesPlanManagementApplication.Common.Interfaces
+@using MudBlazor.Utilities
+
+@inject IStringLocalizer<Dashboard> L
+@inject IUserProfileState UserProfileState
+@inject ITenantSwitchService TenantSwitchService
+
+<PageTitle>@Title</PageTitle>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<ErrorBoundary>
+    <MudGrid Style="padding:16px;">
+        <MudItem xs="12" sm="6">
+            <MudText Typo="Typo.h3" Style="color: white;">
+                Welcome, <span style="color: orangered;">@UserProfile?.DisplayName</span>!
+            </MudText>
+       </MudItem>
+        <MudItem xs="12" sm="6">
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                </MudItem>
+                <MudItem xs="12" sm="6" Class="d-flex flex-column justify-center align-center">
+                    <MudText Typo="Typo.h1" Style="
+                        color: white;
+                        font-weight: 700;
+                        font-family: 'Segoe UI', 'Roboto', sans-serif;
+                        font-size: 4rem;
+                        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+                        ">
+                        @CurrentTime
+                    </MudText>
+
+                    <!-- Announcement Card -->
+                    <MudCard Style="margin-top: 16px; backdrop-filter: blur(10px); background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; color: white; width: 100%;">
+                        <MudCardContent>
+                            <!-- Top Row: View All -->
+                            <MudStack Direction="Row" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.subtitle2" Class="text-uppercase" Style="opacity: 0.8;">Announcements :</MudText>
+                                <MudLink Href="/announcements" Style="font-size: 0.875rem; font-weight: 500; color: var(--mud-palette-primary);">
+                                    View All
+                                </MudLink>
+                            </MudStack>
+
+                            <MudDivider Class="my-2" />
+
+                            <!-- Title -->
+                            <MudText Typo="Typo.subtitle1" Style="font-weight: 600;">
+                                CORPORATE SOLUTIONS
+                            </MudText>
+
+                            <!-- Date -->
+                            <MudText Typo="Typo.caption" Class="mud-secondary-text" Style="margin-bottom: 6px;">
+                                April 29, 2024
+                            </MudText>
+
+                            <!-- Content Preview -->
+                            <MudText Typo="Typo.body2" Style="opacity: 0.9;">
+                                In-house development of ERP application is still ongoing, modular and routine structure designing...
+                            </MudText>
+
+                            <!-- View More -->
+                            <MudLink Href="/announcements/details" Style="font-size: 0.875rem; color: var(--mud-palette-primary); font-weight: 500;">
+                                view more
+                            </MudLink>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudItem>
+   </MudGrid>
+</ErrorBoundary>
+
+
+@code {
+
+    public string Title { get; set; } = "Dashboard";
+
+    private UserProfile UserProfile => UserProfileState.Value;
+    private List<TenantDto>? _availableTenants;
+
+    private string CurrentTime = DateTime.Now.ToString("HH:mm:ss");
+    private System.Timers.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        _timer = new System.Timers.Timer(1000); // 1 second interval
+        _timer.Elapsed += UpdateTime;
+        _timer.Start();
+
+        UserProfileState.Changed += OnUserProfileChanged;
+        base.OnInitialized();
+    }
+
+    private void UpdateTime(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        CurrentTime = DateTime.Now.ToString("HH:mm:ss");
+        InvokeAsync(StateHasChanged); // Trigger re-render
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserProfileState.Changed += OnUserProfileChanged;
+        await LoadAvailableTenants();
+    }
+
+    public void Dispose()
+    {
+        _timer?.Stop();
+        _timer?.Dispose();
+        UserProfileState.Changed -= OnUserProfileChanged;
+    }
+
+    private void OnUserProfileChanged(object? sender, UserProfile userProfile)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadAvailableTenants()
+    {
+        _availableTenants = await TenantSwitchService.GetAvailableTenantsAsync();
+    }
+}

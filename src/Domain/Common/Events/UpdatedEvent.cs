@@ -1,0 +1,13 @@
+﻿using SFCTOFC.DailySalesPlanManagementDomain.Common.Entities;
+
+namespace SFCTOFC.DailySalesPlanManagementDomain.Common.Events;
+
+public class UpdatedEvent<T> : DomainEvent where T : IEntity
+{
+    public UpdatedEvent(T entity)
+    {
+        Entity = entity;
+    }
+
+    public T Entity { get; }
+}

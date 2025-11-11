@@ -1,0 +1,128 @@
+﻿@using SFCTOFC.DailySalesPlanManagementApplication.Common.Security
+
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject LayoutService LayoutService
+@implements IDisposable
+
+<style>
+    px-2 {
+        padding-left: 8px !important;
+    }
+
+    .mud-icon-size-large {
+        font-size: 28px;
+
+    }   
+    .small-white-icon {
+        color: white;
+    }
+
+</style>
+
+@* ito yung sa appbar na app menu button katabi nung sucere food corporation  *@
+<MudIconButton Icon="@Icons.Material.Filled.Apps"
+               style="margin-left: 1px;"
+               class="white-small-icon"
+               Size="Size.Small"
+            
+               OnClick="@ToggleMenu" />
+
+<MudDrawer Anchor="LayoutService.IsRTL ? Anchor.End : Anchor.Start"
+           @bind-Open="@_menuOpen"
+OverlayAutoClose="true"
+Elevation="1"
+Variant="@DrawerVariant.Temporary">
+
+    @* ito naman ung pagkabukas ng app menu icon itong app menu icon sa loob yun. *@
+    <MudDrawerHeader Class="d-flex align-center px-2">   
+        <MudIconButton Icon="@Icons.Material.Filled.Apps"
+                       Size="Size.Small"
+                       
+                       Color="Color.Default"
+                       OnClick="@(() => _menuOpen = false)" />
+        <!-- optional: keep spacer if you add something on the right -->
+        <MudSpacer />
+    </MudDrawerHeader>
+
+    <div style="min-width: 200px;">
+        <MudCardContent>
+            <MudStack Spacing="1" Class="mb-4">
+                <MudText Typo="Typo.h5" Class="font-bold">App Menus</MudText>
+                <MudText Typo="Typo.subtitle1" Class="mud-secondary-text">
+                    Access to in-house developed application modules
+                </MudText>
+            </MudStack>
+            <MudDivider Class="my-2" />
+            <MudGrid GutterSize="2">
+                <MudItem xs="12" sm="4">
+                    <div class="menu-card">
+                        <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                            <img src="/img/icons/module_pos.png" style="height:4.5rem;" />
+                            <MudText Typo="Typo.subtitle1" Class="font-medium" Align="Align.Center">
+                                Point-of-Sale
+                            </MudText>
+                        </MudStack>
+                    </div>
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <div class="menu-card">
+                        <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                            <img src="/img/icons/module_development.png" style="height:4.5rem;" />
+                            <MudText Typo="Typo.subtitle1" Class="font-medium" Align="Align.Center">
+                                Product Manager
+                            </MudText>
+                        </MudStack>
+                    </div>
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <div class="menu-card">
+                        <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                            <img src="/img/icons/module_whm.png" style="height:4.5rem;" />
+                            <MudText Typo="Typo.subtitle1" Class="font-medium" Align="Align.Center">
+                                Website Admin
+                            </MudText>
+                        </MudStack>
+                    </div>
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <div class="menu-card">
+                        <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                            <img src="/img/icons/module_production.png" style="height:4.5rem;" />
+                            <MudText Typo="Typo.subtitle1" Class="font-medium" Align="Align.Center">
+                                Production Ticket
+                            </MudText>
+                        </MudStack>
+                    </div>
+                </MudItem>
+
+                <MudItem xs="12" sm="4">
+                    <div class="menu-card">
+                        <MudStack AlignItems="AlignItems.Center" Spacing="2">
+                            <img src="/img/icons/module_hrms.png" style="height:4.5rem;" />
+                            <MudText Typo="Typo.subtitle1" Class="font-medium" Align="Align.Center">
+                                HRMS
+                            </MudText>
+                        </MudStack>
+                    </div>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </div>
+</MudDrawer>
+
+@code
+{
+    private bool _menuOpen;
+
+    private void ToggleMenu()
+    {
+        _menuOpen = !_menuOpen;
+    }
+    public void Dispose()
+    {
+    }
+}

@@ -1,0 +1,113 @@
+﻿@* 
+headermenu.razor *@
+
+@using SFCTOFC.DailySalesPlanManagementApplication.Features.Tenants.DTOs
+
+@inject IStringLocalizer<HeaderMenu> L
+@inject IUserProfileState UserProfileState
+@inject ITenantSwitchService TenantSwitchService
+<style>
+   .white-small-icon {
+       color: white;
+       height: 25px;
+   }
+
+ 
+</style>
+
+<MudHidden Breakpoint="Breakpoint.SmAndDown">
+
+    <!-- 🔹 Drawer Header Content moved here -->
+    <ExternalAppSelector />
+
+    <img src="/img/Icons/sfclogo.png"
+            alt="Tenant Logo"
+            style="height:25px; margin-left:8px;" />
+
+    <MudText Typo="Typo.h5" Style="margin-left:3px;">
+        <span style="color:white; font-size: 1.1rem;">@UserProfile?.TenantName</span>
+    </MudText>
+
+    <TenantSelector />
+
+    <MudSpacer/>
+    <MudTooltip Arrow="true"
+                Text="@L["Search (Cmd + K)"]">
+        <MudIconButton class="white-small-icon" Color="Color.Default" 
+                        Size="Size.Small"
+                        Edge="Edge.Start"
+                        Icon="@Icons.Material.Filled.Search"
+                        OnClick="OpenSearchDialog" />
+    </MudTooltip>
+    <MudTooltip Arrow="true">
+        <MudIconButton Class="white-small-icon ml-2" Style="margin-left:4px;"
+                        Size="Size.Small"
+                        Edge="Edge.Start"
+                        Icon="@Icons.Material.Filled.QuestionMark" />
+    </MudTooltip>
+    <MudTooltip Arrow="true">
+        <MudIconButton Class="white-small-icon ml-2" Color="Color.Default" Style="margin-left:4px;"
+                       Size="Size.Small"
+                        Edge="Edge.Start"
+                        Icon="@Icons.Material.Filled.Camera" />
+    </MudTooltip>
+    <MudTooltip Arrow="true">
+        <MudIconButton Class="white-small-icon ml-2" Color="Color.Default" Style="margin-left:4px;"
+                       Size="Size.Small"
+                        Edge="Edge.Start"
+                        Icon="@Icons.Material.Filled.Book"/>
+    </MudTooltip>
+
+</MudHidden>
+<MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
+    <MudTooltip Arrow="true"
+                Text="@L["Search (Cmd + K)"]">
+        <MudIconButton Color="Color.Default"
+                        Class="ml-2"
+                        Size="Size.Small"
+                        Edge="Edge.Start"
+                        Icon="@Icons.Material.Filled.AccessAlarm"
+                        OnClick="OpenSearchDialog"/>
+    </MudTooltip>
+    <MudSpacer/>
+    <NotificationMenu/>
+</MudHidden>
+
+<UserInfoCard OnSettingClick="OnSettingClick" />
+
+
+@code
+{
+    [EditorRequired] [Parameter] public bool IsDarkMode { get; set; }
+    [EditorRequired] [Parameter] public bool NavigationMenuDrawerOpen { get; set; }
+    [EditorRequired] [Parameter] public EventCallback ToggleNavigationMenuDrawer { get; set; }
+    [EditorRequired] [Parameter] public EventCallback OpenSearchDialog { get; set; }
+    [EditorRequired] [Parameter] public bool RightToLeft { get; set; }
+    [EditorRequired] [Parameter] public EventCallback RightToLeftToggle { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnSettingClick { get; set; }
+
+    private UserProfile UserProfile => UserProfileState.Value;
+    private List<TenantDto>? _availableTenants;
+
+    private async Task LoadAvailableTenants()
+    {
+        _availableTenants = await TenantSwitchService.GetAvailableTenantsAsync();
+    }
+
+    protected override void OnInitialized()
+    {
+        UserProfileState.Changed += OnUserProfileChanged;
+        base.OnInitialized();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        UserProfileState.Changed += OnUserProfileChanged;
+        await LoadAvailableTenants();
+    }
+
+    private void OnUserProfileChanged(object? sender, UserProfile userProfile)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+}
