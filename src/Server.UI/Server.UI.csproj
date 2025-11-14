@@ -22,24 +22,28 @@
       <Compile Remove="Pages\Production\**" />
       <Compile Remove="Pages\References\NewFolder\**" />
       <Compile Remove="Shared\**" />
+      <Compile Remove="wwwroot\img\NewFolder\**" />
       <Content Remove="Pages\Contacts\**" />
       <Content Remove="Pages\Documents\**" />
       <Content Remove="Pages\Marketing\**" />
       <Content Remove="Pages\Production\**" />
       <Content Remove="Pages\References\NewFolder\**" />
       <Content Remove="Shared\**" />
+      <Content Remove="wwwroot\img\NewFolder\**" />
       <EmbeddedResource Remove="Pages\Contacts\**" />
       <EmbeddedResource Remove="Pages\Documents\**" />
       <EmbeddedResource Remove="Pages\Marketing\**" />
       <EmbeddedResource Remove="Pages\Production\**" />
       <EmbeddedResource Remove="Pages\References\NewFolder\**" />
       <EmbeddedResource Remove="Shared\**" />
+      <EmbeddedResource Remove="wwwroot\img\NewFolder\**" />
       <None Remove="Pages\Contacts\**" />
       <None Remove="Pages\Documents\**" />
       <None Remove="Pages\Marketing\**" />
       <None Remove="Pages\Production\**" />
       <None Remove="Pages\References\NewFolder\**" />
       <None Remove="Shared\**" />
+      <None Remove="wwwroot\img\NewFolder\**" />
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="Hangfire.AspNetCore" Version="1.8.20" />
@@ -75,9 +79,6 @@
     </ItemGroup>
     <ItemGroup>
       <None Include="wwwroot\img\Icons\GSApps.png" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="wwwroot\img\NewFolder\" />
     </ItemGroup>
    
 </Project>

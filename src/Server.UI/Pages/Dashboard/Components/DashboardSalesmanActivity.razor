@@ -1,0 +1,65 @@
+﻿@using SFCTOFC.DailySalesPlanManagement.Domain.Enums
+@using MudBlazor
+
+<MudCard>
+    <MudCardContent>
+        <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-3 mt-7">
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudIcon Icon="@Icons.Material.Filled.CoPresent" Color="Color.Primary" Size="Size.Large" />
+                <MudText Typo="Typo.h3" Class="mb-2 fw-bold"><b>Salesman Activities</b></MudText>
+            </MudStack>
+            <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                <MudTooltip Text="Refresh Dashboard">
+                    <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                                   Color="Color.Primary"
+                                   Size="Size.Small" />
+                </MudTooltip>
+            </MudStack>
+        </MudStack>
+
+        @if (_loading)
+        {
+            <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="mb-4" />
+        }
+        else 
+        {
+            <MudGrid>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4 text-center" Style="background: linear-gradient(135deg, #009688 0%, #4caf50 100%); color: white;" Elevation="4">
+                        <MudIcon Icon="@Icons.Material.Filled.CleanHands" Size="Size.Large" Color="Color.Inherit" Class="mb-2" />
+                        <MudText Typo="Typo.h4" Color="Color.Inherit">0</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Inherit">Target Sales</MudText>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4 text-center" Style="background: linear-gradient(135deg, #009688 0%, #4caf50 100%); color: white;" Elevation="4">
+                        <MudIcon Icon="@Icons.Material.Filled.CleanHands" Size="Size.Large" Color="Color.Inherit" Class="mb-2" />
+                        <MudText Typo="Typo.h4" Color="Color.Inherit">0</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Inherit">Actual Sales</MudText>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4 text-center" Style="background: linear-gradient(135deg, #009688 0%, #4caf50 100%); color: white;" Elevation="4">
+                        <MudIcon Icon="@Icons.Material.Filled.Storefront" Size="Size.Large" Color="Color.Inherit" Class="mb-2" />
+                        <MudText Typo="Typo.h4" Color="Color.Inherit">0</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Inherit">Target Store Visit</MudText>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-4 text-center" Style="background: linear-gradient(135deg, #009688 0%, #4caf50 100%); color: white;" Elevation="4">
+                        <MudIcon Icon="@Icons.Material.Filled.Storefront" Size="Size.Large" Color="Color.Inherit" Class="mb-2" />
+                        <MudText Typo="Typo.h4" Color="Color.Inherit">0</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Inherit">Actual Store Visit</MudText>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private bool _loading = false;
+}
