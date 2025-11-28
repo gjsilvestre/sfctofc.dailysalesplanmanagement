@@ -160,6 +160,134 @@
     }
 </style>
 
-@code {
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
 
+<PageTitle>@Title</PageTitle>
+
+<ErrorBoundary>
+    <MudCard>
+        <MudCardContent>
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mt-7">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.ShoppingCartCheckout" Color="Color.Primary" Size="Size.Large" />
+                    <MudText Typo="Typo.h3" Style="color: black;">
+                        Purchase Order
+                    </MudText>
+                </MudStack>
+                <MudStack Spacing="0" AlignItems="AlignItems.End">
+                    <MudToolBar Dense WrapContent="true" Class="py-1 px-0">
+                        <MudButton Disabled="@_loading">
+                            <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Size="Size.Small" Color="Color.Info" Style="margin: 5px" />
+                            Export to Excel
+                        </MudButton>
+                    </MudToolBar>
+                </MudStack>
+            </MudStack>
+
+        </MudCardContent>
+    </MudCard>
+
+    <MudDataGrid T="OutletDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)"
+                 FixedHeader="true" FixedFooter="false" Loading="@_loading" ColumnResizeMode="ResizeMode.Column"
+                 Striped="true" Dense="true" Hover="true" @ref="_dataGridOutlet" RowsPerPage="20" Style="height:100%; overflow:auto;">
+        <ToolBarContent>
+            <MudStack Row Spacing="0" Class="flex-grow-1 mb-5" Justify="Justify.SpaceBetween">
+                <MudStack Row AlignItems="AlignItems.Start">
+                    <MudStack Spacing="0">
+                        <div style="width: fit-content;">
+                            <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                                @* SEACH FIELD *@
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Dense="true"
+                                              Class="search small-input mt-3 mb-4 mr-5"
+                                              @bind-Value="_paginationQuery.Keyword"
+                                              Placeholder="@ConstantString.Search"
+                                              Adornment="Adornment.End"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              IconSize="Size.Small"
+                                              Immediate="true"
+                                              Clearable="true">
+                                </MudTextField>
+
+                                <MudTooltip Text="Refresh Dashboard">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small" />
+                                </MudTooltip>
+
+                                <MudButton Disabled="@_loading"
+                                           class="mr-6"
+                                           Size="Size.Small">
+                                    <MudIcon Icon="@Icons.Material.Filled.PlaylistAdd" Size="Size.Small" Style="margin: 3px" Color="Color.Info" />
+                                    Add Customer PO
+                                </MudButton>
+                            </MudStack>
+                        </div>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </ToolBarContent>
+
+        <Columns>
+            <TemplateColumn HeaderStyle="width:60px" class="mt-5" Title="@ConstantString.Actions" Sortable="false" StickyLeft="true">
+                <CellTemplate>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <MudIconButton Icon="@Icons.Material.Filled.EditNote" Color="Color.Info" Size="Size.Small" Disabled="!_accessRights.Edit" />
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+           
+        </Columns>
+
+        <NoRecordsContent>
+            <MudText>@ConstantString.NoRecords</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText>@ConstantString.Loading</MudText>
+        </LoadingContent>
+        <PagerContent>
+            <MudDataGridPager PageSizeOptions="@(new[] { 10, 15, 30, 50, 100, 500, 1000 })" />
+        </PagerContent>
+    </MudDataGrid>
+</ErrorBoundary>
+
+@code {
+    public string Title { get; set; } = "Outlet";
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+    [CascadingParameter] private UserProfile? UserProfile { get; set; }
+    private OutletAccessRights _accessRights = new();
+    private PaginationQueryOutlets _paginationQuery { get; } = new();
+    private bool _loading;
+
+    private int _currentIndex = 0;
+    private OutletDto _currentDto = new();
+    private List<OutletDto> _List = new();
+    private MudDataGrid<OutletDto> _dataGridOutlet = default!;
+
+    private MudForm? _form;
+    private AddEditOutletCommand _model = new();
+
+    private async Task<GridData<OutletDto>> ServerReload(GridState<OutletDto> state)
+    {
+        try
+        {
+            _loading = true;
+            _paginationQuery.CurrentUser = UserProfile;
+            _paginationQuery.OrderBy = state.SortDefinitions.FirstOrDefault()?.SortBy ?? "Id";
+            _paginationQuery.SortDirection = state.SortDefinitions.FirstOrDefault()?.Descending ?? true
+                                             ? SortDirection.Descending.ToString()
+                                             : SortDirection.Ascending.ToString();
+            _paginationQuery.PageNumber = state.Page + 1;
+            _paginationQuery.PageSize = state.PageSize;
+
+            var result = await Mediator.Send(_paginationQuery).ConfigureAwait(false);
+            _List = result.Items?.ToList() ?? new List<OutletDto>();
+            return new GridData<OutletDto> { TotalItems = result.TotalItems, Items = _List };
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
 }

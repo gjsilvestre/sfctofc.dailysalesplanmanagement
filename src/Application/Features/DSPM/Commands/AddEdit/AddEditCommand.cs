@@ -3,6 +3,7 @@
 using DocumentFormat.OpenXml.Office2010.Excel;
 using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Caching;
 using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
+using SFCTOFC.DailySalesPlanManagement.Application.Features.Products.Commands.AddEdit;
 
 namespace SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Commands.AddEdit;
 public class AddEditCommandPurchaseOrder : ICacheInvalidatorRequest<Result<int>>
@@ -66,6 +67,82 @@ public class AddEditCommandPurchaseOrderDetails : ICacheInvalidatorRequest<Resul
         }
     }
 }
+
+#region OUTLET
+public class AddEditOutletCommand : ICacheInvalidatorRequest<Result<int>>
+{
+    #region PARAMETERS
+
+    public int Id { get; set; }
+    public string? ExternalId { get; set; }
+    public string? Name { get; set; }
+    public string? Address { get; set; }
+    public string? Barangay { get; set; }
+    public string? City { get; set; }
+    public string? Province { get; set; }
+    public string? Region { get; set; }
+    public decimal? Latitude { get; set; }
+    public decimal? Longitude { get; set; }
+    public string? Channel { get; set; }
+    public string? Salesman { get; set; }
+    public string? Supervisor { get; set; }
+    public string? BusinessDivision { get; set; }
+    public string? Route { get; set; }
+    public int? CallSequence { get; set; }
+    public string? Image { get; set; }
+
+    #endregion
+
+    public string CacheKey => OutletsCacheKey.GetOutletByIdCacheKey(Id);
+    public IEnumerable<string>? Tags => OutletsCacheKey.Tags;
+
+    private class Mapping : Profile
+    {
+        public Mapping()
+        {
+            CreateMap<OutletDto, AddEditOutletCommand>().ReverseMap();
+            CreateMap<AddEditOutletCommand, Outlets>(MemberList.None)
+                .ForMember(dest => dest.CreatedBy, opt => opt.Ignore());
+        }
+    }
+}
+
+public class AddEditOutletCommandHandler : IRequestHandler<AddEditOutletCommand, Result<int>>
+{
+    private readonly IApplicationDbContextFactory _dbContextFactory;
+    private readonly IMapper _mapper;
+
+    public AddEditOutletCommandHandler(
+        IApplicationDbContextFactory dbContextFactory,
+        IMapper mapper
+    )
+    {
+        _dbContextFactory = dbContextFactory;
+        _mapper = mapper;
+    }
+
+    public async Task<Result<int>> Handle(AddEditOutletCommand request, CancellationToken cancellationToken)
+    {
+        await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+        if (request.Id > 0)
+        {
+            var item = await db.Outlets.SingleOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            if (item == null) return await Result<int>.FailureAsync($"Record with id: [{request.Id}] not found.");
+            item = _mapper.Map(request, item);
+            await db.SaveChangesAsync(cancellationToken);
+            return await Result<int>.SuccessAsync(item.Id);
+        }
+        else
+        {
+            var item = _mapper.Map<Outlets>(request);
+            db.Outlets.Add(item);
+            await db.SaveChangesAsync(cancellationToken);
+            return await Result<int>.SuccessAsync(item.Id);
+        }
+    }
+}
+
+#endregion
 
 #region MOBILE APP: SUBMIT ORDERS
 

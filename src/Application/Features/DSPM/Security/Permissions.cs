@@ -89,6 +89,35 @@ public static partial class Permissions
         [Description("Allows importing records")]
         public const string Import = "Permissions.SalesOrder.Import";
     }
+
+    [DisplayName("Outlet Permissions")]
+    [Description("Set permissions for Sales Order operations")]
+    public static class Outlet
+    {
+        [Description("Allows viewing records")]
+        public const string View = "Permissions.Outlet.View";
+
+        [Description("Allows creating new records")]
+        public const string Create = "Permissions.Outlet.Create";
+
+        [Description("Allows modifying existing records")]
+        public const string Edit = "Permissions.Outlet.Edit";
+
+        [Description("Allows deleting records")]
+        public const string Delete = "Permissions.Outlet.Delete";
+
+        [Description("Allows printing records")]
+        public const string Print = "Permissions.Outlet.Print";
+
+        [Description("Allows searching for records")]
+        public const string Search = "Permissions.Outlet.Search";
+
+        [Description("Allows exporting records")]
+        public const string Export = "Permissions.Outlet.Export";
+
+        [Description("Allows importing records")]
+        public const string Import = "Permissions.Outlet.Import";
+    }
 }
 
 
@@ -117,6 +146,18 @@ public class PurchaseOrderAccessRights
 }
 
 public class SalesOrderAccessRights
+{
+    public bool View { get; set; }
+    public bool Create { get; set; }
+    public bool Edit { get; set; }
+    public bool Delete { get; set; }
+    public bool Print { get; set; }
+    public bool Search { get; set; }
+    public bool Export { get; set; }
+    public bool Import { get; set; }
+}
+
+public class OutletAccessRights
 {
     public bool View { get; set; }
     public bool Create { get; set; }

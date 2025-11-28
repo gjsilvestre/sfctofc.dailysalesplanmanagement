@@ -139,8 +139,9 @@ public class PaginationQueryPurchaseOrderHandler : IRequestHandler<PaginationQue
 
 #region Outlets
 
-public class PaginationQueryOutlets : PaginationFilter, IRequest<PaginatedData<OutletDto>>
+public class PaginationQueryOutlets : AdvancedFilterOutlet, IRequest<PaginatedData<OutletDto>>
 {
+    public AdvancedSpecificationOutlet Specification => new(this);
     public string CacheKey => OutletsCacheKey.GetPaginationCacheKey($"{this}");
     public IEnumerable<string>? Tags => OutletsCacheKey.Tags;
     // the currently logged in user
