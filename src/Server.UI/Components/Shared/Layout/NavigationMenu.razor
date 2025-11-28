@@ -11,14 +11,14 @@
            OpenChanged="@OnDrawerOpenChanged"
            Variant="DrawerVariant.Mini"
            MiniWidth="70px"> *@
-    
-    @* drawerheader *@
-    @* <MudDrawerHeader Class="d-flex pa-0">
+
+@* drawerheader *@
+@* <MudDrawerHeader Class="d-flex pa-0">
         <ExternalAppSelector/>
     
     </MudDrawerHeader> *@
 
-    <style>
+<style>
     /* make all navmenu icons smaller */
     .sidebar-navmenu .mud-icon-root {
         font-size: 18px !important; /* default is 24px */
@@ -26,7 +26,6 @@
 
     .sidebar-navmenu .mud-nav-link {
         min-height: 36px !important; /* default ~48px */
-
     }
     /* Hide scrollbar sa sidebar navmenu */
     .sidebar-navmenu {
@@ -47,9 +46,9 @@
         padding: 4px 4px;
     }
 
-    .small-menu-item .mud-icon-root {
+        .small-menu-item .mud-icon-root {
             font-size: 1rem;
-    }
+        }
     /* 🔹 Collapsed Sidebar: make icons smaller */
     .sidebar-navmenu .sidebar-collapsed-item .mud-icon-root {
         font-size: 16px !important; /* default ~24px; adjust smaller if you want */
@@ -69,73 +68,78 @@
     .pa-2 {
         padding: 10px !important;
     }
-    </style>
+</style>
 
-    <MudStack Row
-              AlignItems="AlignItems.Center"
-              JustifyContent="JustifyContent.Center"
-              Class="w-100 pa-2">
-        @* yung menu 3 lines sa sidebar *@
-        <MudIconButton Icon="@Icons.Material.Filled.Menu"
-                       Size="Size.Small"
-                       Color="Color.Default"
-                       OnClick="ToggleDrawer"
-                    />
-    </MudStack>
+<MudStack Row
+          AlignItems="AlignItems.Center"
+          JustifyContent="JustifyContent.Center"
+          Class="w-100 pa-2">
+    @* yung menu 3 lines sa sidebar *@
+    <MudIconButton Icon="@Icons.Material.Filled.Menu"
+                   Size="Size.Small"
+                   Color="Color.Default"
+                   OnClick="ToggleDrawer" />
+</MudStack>
 
-    <MudNavMenu Class="sidebar-navmenu">
-        @foreach (var section in MenuSections.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
+<MudNavMenu Class="sidebar-navmenu">
+    @foreach (var section in MenuSections.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
+    {
+        @if (section?.SectionItems is not null)
         {
-            @if (section?.SectionItems is not null)
+            @foreach (var sectionItem in section.SectionItems.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
             {
-                @foreach (var sectionItem in section.SectionItems.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
+                @if (sectionItem is { IsParent: true, MenuItems: not null })
                 {
-                    @if (sectionItem is { IsParent: true, MenuItems: not null })
+                    // mga icons and items if ever nakabukas yung side bar
+                    @if (DrawerOpen)
                     {
-                        // mga icons and items if ever nakabukas yung side bar
-                        @if (DrawerOpen)
-                        {
-                            @* Expanded mode (inline MudNavGroup) *@
-                            <MudNavGroup Icon="@sectionItem.Icon"
-       
-                                         Class="mb-2"
-                                         Title="@L[sectionItem.Title]"
-                                         Expanded="@IsGroupExpanded(sectionItem)"
-                                         @onclick="@(() => ToggleGroup(sectionItem))">
-                                @foreach (var menuItem in sectionItem.MenuItems)
-                                {
-                                    <MudNavLink Icon="@menuItem.Icon"
-                                                Size="Size.Small"   
-                                                Class="small-menu-item"
-                                                Disabled="@(menuItem.PageStatus != PageStatus.Completed)"
-                                                Href="@menuItem.Href"
-                                                Target="@menuItem.Target"
-                                                Match="NavLinkMatch.Prefix">
-                                        @(L[menuItem.Title])
-                                    </MudNavLink>
-                                }
-                            </MudNavGroup>
-                        }
-                        else
-                        {
+                        @* Expanded mode (inline MudNavGroup) *@
+                        <MudNavGroup Icon="@sectionItem.Icon"
+                                     Class="mb-2"
+                                     Title="@L[sectionItem.Title]"
+                                     Expanded="@IsGroupExpanded(sectionItem)"
+                                     @onclick="@(() => ToggleGroup(sectionItem))">
+                            @foreach (var menuItem in sectionItem.MenuItems)
+                            {
+                                <MudNavLink Icon="@menuItem.Icon"
+                                            Size="Size.Small"
+                                            Class="small-menu-item"
+                                            Disabled="@(menuItem.PageStatus != PageStatus.Completed)"
+                                            Href="@menuItem.Href"
+                                            Target="@menuItem.Target"
+                                            Match="NavLinkMatch.Prefix">
+                                    @(L[menuItem.Title])
+                                </MudNavLink>
+                            }
+                        </MudNavGroup>
+                    }
+                    else
+                    {
                         // yung mga icon position if nakacollapse yung sidebar
                         @* Collapsed mode → icon + hover popover *@
                         <div class="sidebar-collapsed-item"
                              @onmouseover="@(() => ShowPopover(sectionItem))"
                              @onmouseleave="@(() => HidePopoverWithDelay(sectionItem))">
 
-                            <MudNavLink Icon="@sectionItem.Icon" Class="mb-2" DisableRipple="true" Href="#" />
+                            <MudNavLink Icon="@sectionItem.Icon" Class="mb-2"
+                                        Style=""
+                                        DisableRipple="true"
+                                        Href="#">
 
-                            <MudPopover Open="@(_hoveredItem == sectionItem)" Style="box-shadow: none"
+                            </MudNavLink>
+
+                            <MudPopover Open="@(_hoveredItem == sectionItem)"
                                         AnchorOrigin="Origin.TopRight"
                                         TransformOrigin="Origin.TopLeft"
+                                        Style="box-shadow: none;"
                                         CloseOnOutsideClick="true"
                                         @onmouseover="@(() => CancelHide())"
                                         @onmouseleave="@(() => HidePopoverWithDelay(sectionItem))">
-                                <MudPaper Class="p-0 d-flex align-center" Style="height:50px; min-width: 220px; box-shadow: none">
+                                <MudPaper Class="p-2 d-flex align-center"
+                                          Style="height:40px; min-width: 220px; background-color:#e9e9e9;">
                                     <MudText Typo="Typo.h6" Class="ml-6">@sectionItem.Title</MudText>
                                 </MudPaper>
-                                <MudPaper Class="p-2" Style="box-shadow: none">
+                                <MudPaper Class="p-2">
                                     @foreach (var menuItem in sectionItem.MenuItems)
                                     {
                                         <MudNavLink Icon="@menuItem.Icon"
@@ -153,27 +157,27 @@
                         </div>
 
 
+                    }
+                }
+                else
+                {
+                    // Dashboard Icon
+                    <MudNavLink Href="@sectionItem.Href"
+                                Icon="@sectionItem.Icon"
+                                Target="@sectionItem.Target"
+                                Match="NavLinkMatch.All"
+                                Style="margin-left: -2px; margin-bottom: 8px;"
+                                Class="sidebar-link">
+                        @if (IsExpanded)
+                        {
+                            @(L[sectionItem.Title])
                         }
-                    }
-                    else
-                    {
-                        // yung dashboard icon
-                        <MudNavLink Href="@sectionItem.Href"
-                                    Icon="@sectionItem.Icon"
-                                    Target="@sectionItem.Target"
-                                    Match="NavLinkMatch.All"
-                                    Style="margin-left: -2px"
-                                    Class="sidebar-link">
-                            @if (IsExpanded)
-                            {
-                                @(L[sectionItem.Title])
-                            }
-                        </MudNavLink>
-                    }
+                    </MudNavLink>
                 }
             }
         }
-    </MudNavMenu>
+    }
+</MudNavMenu>
 
 
 
@@ -207,12 +211,12 @@ else
 {
     [Inject] private NavigationManager Nav { get; set; } = default!;
 
-    private bool IsExpanded = true; 
+    private bool IsExpanded = true;
     private object? _hoveredItem;
 
     private void ClosePopover() => _hoveredItem = null;
 
-    private bool IsGroupExpanded(object sectionItem) => true; 
+    private bool IsGroupExpanded(object sectionItem) => true;
     private void ToggleGroup(object sectionItem) { }
 
     private CancellationTokenSource? _cts;
@@ -241,7 +245,7 @@ else
             if (!_cts.Token.IsCancellationRequested)
             {
                 _hoveredItem = null;
-                StateHasChanged(); 
+                StateHasChanged();
             }
         }
         catch (TaskCanceledException) { }
@@ -255,19 +259,19 @@ else
 
     private void NavigateTo(string href)
     {
-        _hoveredItem = null; 
+        _hoveredItem = null;
         StateHasChanged();
         Nav.NavigateTo(href);
     }
 
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
-    [EditorRequired] [Parameter] public EventCallback<bool> DrawerOpenChanged { get; set; }
+    [EditorRequired][Parameter] public EventCallback<bool> DrawerOpenChanged { get; set; }
 
     [EditorRequired][Parameter] public bool DrawerOpen { get; set; } = false;
 
     private IEnumerable<MenuSectionModel> MenuSections => MenuService.Features;
-    [EditorRequired] [Parameter] public string[] Roles { get; set; } = Array.Empty<string>();
-    
+    [EditorRequired][Parameter] public string[] Roles { get; set; } = Array.Empty<string>();
+
     [Parameter] public EventCallback<MouseEventArgs> OnSettingClick { get; set; }
 
     private Dictionary<string, bool> NavGroupExpandedStates = new();

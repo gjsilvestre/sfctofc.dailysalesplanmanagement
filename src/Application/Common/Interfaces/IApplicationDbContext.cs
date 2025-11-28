@@ -11,6 +11,10 @@ public interface IApplicationDbContext: IAsyncDisposable
     #region DSPM
     DbSet<Outlets> Outlets { get; set; }
     DbSet<SalesmanTracker> SalesmanTracker { get; set; }
+    DbSet<PurchaseOrder> PurchaseOrder { get; set; }
+    DbSet<PurchaseOrderDetails> PurchaseOrderDetails { get; set; }
+    DbSet<SalesOrder> SalesOrder { get; set; }
+    DbSet<SalesOrderDetails> SalesOrderDetails { get; set; }
 
     #endregion
 

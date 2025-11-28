@@ -18,11 +18,9 @@ headermenu.razor *@
 <MudHidden Breakpoint="Breakpoint.SmAndDown">
 
     <!-- 🔹 Drawer Header Content moved here -->
-    <ExternalAppSelector />
+    @* <ExternalAppSelector /> *@
 
-    <img src="/img/rmclogo.png"
-            alt="Tenant Logo"
-            style="height:25px; margin-left:10px;" />
+    <img src="/img/rmclogo.png"  alt="Tenant Logo" style="height:25px; margin-left:3px;" />
 
     <MudText Typo="Typo.h5" Style="margin-left:5px;">
         <span style="color:white; font-size: 1.1rem;">@UserProfile?.TenantName</span>
@@ -30,34 +28,45 @@ headermenu.razor *@
 
     @* <TenantSelector /> *@
 
-    <MudSpacer/>
-    <MudTooltip Arrow="true"
-                Text="@L["Search (Cmd + K)"]">
-        <MudIconButton class="white-small-icon" Color="Color.Default" 
-                        Size="Size.Small"
-                        Edge="Edge.Start"
-                        Icon="@Icons.Material.Filled.Search"
-                        OnClick="OpenSearchDialog" />
-    </MudTooltip>
-    <MudTooltip Arrow="true">
-        <MudIconButton Class="white-small-icon ml-2" Style="margin-left:4px;"
-                        Size="Size.Small"
-                        Edge="Edge.Start"
-                        Icon="@Icons.Material.Filled.QuestionMark" />
-    </MudTooltip>
-    <MudTooltip Arrow="true">
-        <MudIconButton Class="white-small-icon ml-2" Color="Color.Default" Style="margin-left:4px;"
+    <MudSpacer />
+    <MudTooltip Arrow="true" Text="@L["Search (Cmd + K)"]">
+        <MudIconButton class="white-small-icon ml-2" Color="Color.Default"
                        Size="Size.Small"
-                        Edge="Edge.Start"
-                        Icon="@Icons.Material.Filled.Camera" />
+                       Edge="Edge.Start"
+                       Icon="@Icons.Material.Filled.Search"
+                       OnClick="OpenSearchDialog" />
     </MudTooltip>
-    <MudTooltip Arrow="true">
-        <MudIconButton Class="white-small-icon ml-2" Color="Color.Default" Style="margin-left:4px;"
-                       Size="Size.Small"
-                        Edge="Edge.Start"
-                        Icon="@Icons.Material.Filled.Book"/>
-    </MudTooltip>
+    <MudTooltip Arrow="true" Text="@L["Notification"]">
 
+        <MudIconButton Class="white-small-icon ml-2" Style="margin-left:4px;"
+                       Size="Size.Small"
+                       Edge="Edge.Start"
+                       Icon="@Icons.Material.Outlined.Dns" />
+    </MudTooltip>
+    <MudTooltip Arrow="true" Text="@L["Help"]">
+        <MudIconButton Class="white-small-icon ml-2" Style="margin-left:4px;"
+                       Size="Size.Small"
+                       Edge="Edge.Start"
+                       Icon="@Icons.Material.Outlined.HelpOutline" />
+    </MudTooltip>
+    <MudTooltip Arrow="true" Text="@L["Virtual Tour"]">
+        <MudIconButton Class="white-small-icon ml-2" Color="Color.Default" Style="margin-left:4px;"
+                       Size="Size.Small"
+                       Edge="Edge.Start"
+                       Icon="@Icons.Material.Outlined.CenterFocusStrong" />
+    </MudTooltip>
+    <MudTooltip Arrow="true" Text="@L["Knowledge Base"]">
+        <MudIconButton Class="white-small-icon ml-2" Color="Color.Default" Style="margin-left:4px;"
+                       Size="Size.Small"
+                       Edge="Edge.Start"
+                       Icon="@Icons.Material.Filled.Book" />
+    </MudTooltip>
+    <MudTooltip Arrow="true" Text="@L["Settings"]">
+        <MudIconButton Class="white-small-icon ml-2" Color="Color.Default" Style="margin-left:4px;"
+                       Size="Size.Small"
+                       Edge="Edge.Start"
+                       Icon="@Icons.Material.Outlined.Settings" />
+    </MudTooltip>
 </MudHidden>
 <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
     <MudTooltip Arrow="true"

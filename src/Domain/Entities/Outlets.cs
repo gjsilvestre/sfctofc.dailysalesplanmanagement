@@ -5,6 +5,7 @@ namespace SFCTOFC.DailySalesPlanManagement.Domain.Entities;
 
 public class Outlets : BaseAuditableEntity
 {
+    public string? ExternalId { get; set; }
     public string? Name { get; set; }
     public string? Address { get; set; }
     public string? Barangay { get; set; }
@@ -15,6 +16,8 @@ public class Outlets : BaseAuditableEntity
     public decimal? Longitude { get; set; }
     public string? Channel { get; set; }
     public string? Salesman { get; set; }
+    public string? Supervisor { get; set; }
+    public string? BusinessDivision { get; set; }
     public string? Route { get; set; }
     public int? CallSequence { get; set; }
     public string? Image { get; set; }

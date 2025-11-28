@@ -1,13 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-
+﻿
 using SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.Caching;
 using SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.DTOs;
 using SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.Specifications;
 
 namespace SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.Queries.PaginationQuery;
 
-public class PicklistSetsWithPaginationQuery : PicklistSetAdvancedFilter, ICacheableRequest<PaginatedData<PicklistSetDto>>
+public class PicklistSetsWithPaginationQuery : PicklistSetAdvancedFilter, IRequest<PaginatedData<PicklistSetDto>>
 {
     public PicklistSetAdvancedSpecification Specification => new(this);
     public string CacheKey => $"{nameof(PicklistSetsWithPaginationQuery)},{this}";

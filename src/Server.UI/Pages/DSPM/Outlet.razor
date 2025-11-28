@@ -1,0 +1,165 @@
+﻿@page "/pages/outlet"
+
+@using SFCTOFC.DailySalesPlanManagement.Server.UI.Pages.Dashboard.Components
+@using SFCTOFC.DailySalesPlanManagement.Application.Common.Security
+@using SFCTOFC.DailySalesPlanManagement.Application.Common.Interfaces.Identity
+@using SFCTOFC.DailySalesPlanManagement.Application.Common.Interfaces
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.Tenants.DTOs
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Commands.AddEdit
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.GetAll
+@using MudBlazor.Utilities
+
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.Pagination;
+
+@inject IStringLocalizer<Outlet> L
+@inject IUserProfileState UserProfileState
+@inject ITenantSwitchService TenantSwitchService
+
+<style>
+    @@import url("https://cdn.jsdelivr.net/npm/@@fancyapps/ui@@5.0.36/dist/fancybox/fancybox.css");
+
+    .fancybox__container {
+        --fancybox-bg: rgba(24, 24, 27, 0.85);
+        z-index: 9999;
+    }
+
+    html, body {
+        -moz-osx-font-smoothing: grayscale; /* Firefox on macOS */
+        -webkit-font-smoothing: antialiased; /* Chrome, Edge, Safari */
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        font-size: 12px;
+    }
+
+    .mud-menu .mud-icon-button {
+        border-radius: 0 !important;
+    }
+
+    .search .mud-input {
+        line-height: 1px !important;
+    }
+
+    .small-input .mud-input-slot {
+        min-height: 28px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .small-input input {
+        padding: 2px 6px !important;
+    }
+
+    .mud-card-content {
+        flex-grow: 1;
+        padding: 17px;
+        margin-top: -36px !important;
+    }
+
+    .mud-input-control > .mud-input-control-input-container > .mud-input-label-inputcontrol {
+        font-size: 1rem !important;
+        font-weight: 600;
+    }
+
+    .mud-table.mud-data-grid .mud-table-toolbar {
+        padding: 0rem !important;
+    }
+
+    .mud-table-root {
+        margin-top: 1.3ewm !important;
+    }
+
+    .mud-table thead th {
+        /* background-color: #c3c3c3 !important; */
+        /* background-color: #dddddd !important;  */
+        color: black !important;
+        font-weight: 600;
+        /* border: 1px solid #ccc; */
+        /* border-top: 1px solid #eaeaea; */
+    }
+
+    .force-row {
+        display: flex !important;
+        flex-direction: row !important;
+    }
+
+    .gap-20 {
+        column-gap: 190px;
+    }
+
+    .gap-21 {
+        column-gap: 207px;
+    }
+
+    .gap-22 {
+        column-gap: 140px;
+    }
+
+    .gap-19 {
+        /* column-gap: 159px; */
+    }
+
+    .mud-table-bordered th,
+    .mud-table-bordered td {
+        align-content: flex-start;
+        border: 1px solid #E3E3E3;
+        padding: 6px;
+    }
+
+    .mud-table-bordered {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .compact-padding {
+        padding: 9px 16px 0px 16px;
+    }
+
+
+    .ultra-compact-grid .mud-table-row {
+        height: 26px !important;
+    }
+
+    .ultra-compact-grid .mud-table-cell {
+        padding: 2px 6px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .mud-data-grid .mud-table-foot {
+        display: none !important;
+    }
+
+    .mud-table.mud-table-striped tbody tr:nth-child(odd) {
+        background-color: #fafafa !important;
+    }
+
+    .mud-table.mud-table-striped tbody tr:nth-child(even) {
+        background-color: #ebebeb !important;
+    }
+
+    .mud-table.mud-table-hover tbody tr:hover {
+        background-color: #00baef !important;
+        color: white;
+        cursor: pointer;
+    }
+
+    .mud-datagrid-header {
+        border-bottom: 1px solid #E6E6E6;
+    }
+
+    .mud-datagrid-pager .mud-select {
+        margin-left: auto !important;
+    }
+
+    .custom-pager .mud-datagrid-pager {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+</style>
+
+@code {
+
+}

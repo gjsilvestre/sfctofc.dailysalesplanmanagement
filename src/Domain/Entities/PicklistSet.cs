@@ -49,5 +49,6 @@ public enum Picklist
     [Description("JOB REQ REASON")] JRQReason,
     [Description("JOB REQ PRIORITY")] JRQPriority,
     [Description("PRODUCTION TICKET MACHINE")] ProductionTicketMachine,
-    [Description("PRODUCTION TICKET CHOCOLATE MACHINE")] ProductionTicketChocolateMachine
+    [Description("PRODUCTION TICKET CHOCOLATE MACHINE")] ProductionTicketChocolateMachine,
+    [Description("REPORT TYPE")] ReportType
 }

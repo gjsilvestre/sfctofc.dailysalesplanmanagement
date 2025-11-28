@@ -3,6 +3,7 @@ using SFCTOFC.DailySalesPlanManagement.Domain.Common.Entities;
 using SFCTOFC.DailySalesPlanManagement.Domain.Identity;
 
 namespace SFCTOFC.DailySalesPlanManagement.Domain.Entities;
+
 public class SalesmanTracker : BaseAuditableEntity
 {
     public string? AspNetUserId { get; set; }

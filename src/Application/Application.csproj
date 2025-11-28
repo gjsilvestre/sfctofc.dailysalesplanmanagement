@@ -36,8 +36,6 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Features\Distributors\DTOs\" />
-      <Folder Include="Features\DSPM\Commands\" />
-      <Folder Include="Features\DSPM\Security\" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />

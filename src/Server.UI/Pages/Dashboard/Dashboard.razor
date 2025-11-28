@@ -3,8 +3,8 @@
 @using SFCTOFC.DailySalesPlanManagement.Server.UI.Pages.Dashboard.Components
 @using SFCTOFC.DailySalesPlanManagement.Application.Common.Security
 @using SFCTOFC.DailySalesPlanManagement.Application.Common.Interfaces.Identity
-@using SFCTOFC.DailySalesPlanManagement.Application.Features.Tenants.DTOs
 @using SFCTOFC.DailySalesPlanManagement.Application.Common.Interfaces
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.Tenants.DTOs
 @using MudBlazor.Utilities
 
 @using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
@@ -163,25 +163,49 @@
 <PageTitle>@Title</PageTitle>
 
 <ErrorBoundary>
+    <MudCard>
+        <MudCardContent>
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mb-7 mt-7">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.CoPresent" Color="Color.Primary" Size="Size.Large" />
+                    <MudText Typo="Typo.h3" Style="color: black;">
+                        Welcome, <span style="color: orangered;">@UserProfile?.DisplayName</span>!
+                    </MudText>
+                </MudStack>
+            </MudStack>
+        </MudCardContent>
+    </MudCard>
 
     <DashboardSalesmanActivity />
 
     <MudDataGrid T="SalesmanTrackerDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)"
                  FixedHeader="true" FixedFooter="false" Loading="@_loading" ColumnResizeMode="ResizeMode.Column" 
-                 Striped="true" Dense="true" Hover="true" @ref="_dataGridSalesmanTracket" RowsPerPage="15" Style="height:100%; overflow:auto;">
-        
+                 Striped="true" Dense="true" Hover="true" @ref="_dataGridSalesmanTracket" RowsPerPage="20" Style="height:100%; overflow:auto;">
         <ToolBarContent>
             <MudStack Row Spacing="0" Class="flex-grow-1 mb-5" Justify="Justify.SpaceBetween">
+                <MudStack Row AlignItems="AlignItems.End">
+                    <MudStack Spacing="0">
+                        <div style="width: fit-content; margin: 0 auto;">
+                            <MudStack Row Spacing="0" Class="force-row" AlignItems="AlignItems.Center">
+                                <MudText Typo="Typo.h5" Class="mb-2 fw-bold"><b>Todays Plan</b></MudText>
+
+                                <MudToolBar Dense WrapContent="true" Class="py-1 px-0">
+                                    <MudDatePicker Label="Date" Class="ml-4" Margin="Margin.Dense" Variant="Variant.Outlined" />
+                                </MudToolBar>
+                            </MudStack>
+                        </div>
+                    </MudStack>
+                </MudStack>
                 <MudStack Row AlignItems="AlignItems.Start">
                     <MudStack Spacing="0">
                         @* <MudText Typo="Typo.h3" Class="mb-2 fw-bold"><b>Salesman Activities</b></MudText> *@
                         <div style="width: fit-content;">
-                            <MudStack Row Spacing="1">
+                            <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
                                 @* SEACH FIELD *@
                                 <MudTextField T="string"
                                               Variant="Variant.Outlined"
                                               Dense="true"
-                                              Class="search small-input mt-3 mb-4"
+                                              Class="search small-input mt-3 mb-4 mr-5"
                                               @bind-Value="_paginationQuery.Keyword"
                                               Placeholder="@ConstantString.Search"
                                               Adornment="Adornment.End"
@@ -190,17 +214,12 @@
                                               Immediate="true"
                                               Clearable="true">
                                 </MudTextField>
-                            </MudStack>
-                        </div>
-                    </MudStack>
-                </MudStack>
-                <MudStack Row AlignItems="AlignItems.End">
-                    <MudStack Spacing="0">
-                        <div style="width: fit-content;">
-                            <MudStack Row Spacing="0" Class="force-row">
-                                <MudToolBar Dense WrapContent="true" Class="py-1 px-0">
-                                    <MudDatePicker Label="Date" Margin="Margin.Dense" Variant="Variant.Outlined" />
-                                </MudToolBar>
+
+                                <MudTooltip Text="Refresh Dashboard">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small" />
+                                </MudTooltip>
                             </MudStack>
                         </div>
                     </MudStack>
@@ -210,15 +229,16 @@
 
         <Columns>
             <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.Name" Title="Salesman" />
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.Date" Title="Date">
+            @* <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.Date" Title="Date">
                 <CellTemplate>
                     @(context.Item.Date?.ToString("MMM dd, yyyy") ?? "")
                 </CellTemplate>
-            </PropertyColumn>
+            </PropertyColumn> *@
             <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.TargetSales" Title="Target Sales" />
             <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.ActualSales" Title="Actual Sales" />
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.TargetStoreVisited" Title="Target Store Visited" />
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.ActualStoreVisited" Title="Actual Store Visited" />
+            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.TargetStoreVisited" Title="Scheduled" />
+            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.ActualStoreVisited" Title="Visited" />
+            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.Skipped" Title="Skipped" />
         </Columns>
 
         <NoRecordsContent>
@@ -228,10 +248,9 @@
             <MudText>@ConstantString.Loading</MudText>
         </LoadingContent>
         <PagerContent>
-            <MudDataGridPager PageSizeOptions="@(new[] { 15, 30, 50, 100 })" Class="custom-pager" />
+            <MudDataGridPager PageSizeOptions="@(new[] { 10, 20, 30, 50 })" Class="custom-pager" />
         </PagerContent>
     </MudDataGrid>
-
 </ErrorBoundary>
 
 

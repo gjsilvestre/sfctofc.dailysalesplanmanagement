@@ -63,10 +63,10 @@ public class PDFService : IPDFService
                                .FontColor(Colors.Black)
                            );
                        });
-                        col.Item().AlignLeft().Text("Sucere Foods Corporation").FontSize(7).FontColor(Colors.Grey.Darken1);
+                        col.Item().AlignLeft().Text("Rodzon Marketing Corporation").FontSize(7).FontColor(Colors.Grey.Darken1);
                         //col.Item().AlignCenter().Text("130-A 20th Avenuew, Tagumpay 1109 Quezon City NCR, Second District Philippines").FontSize(7).FontColor(Colors.Grey.Darken1);
-                        col.Item().AlignLeft().Text("First Bulacan Industrial City, Barangay Tikay City of Malolos, Bulacan,  Philippines").FontSize(7).FontColor(Colors.Grey.Darken1);
-                        col.Item().PaddingBottom(15).AlignLeft().Text("Tel. Nos. (044) 796-1060 / 796-1047").FontSize(7).FontColor(Colors.Grey.Darken1);
+                        col.Item().AlignLeft().Text("2451 Lakandula St., Doña Adela Hidalgo Village, Pasay City, Philippines").FontSize(7).FontColor(Colors.Grey.Darken1);
+                        col.Item().PaddingBottom(15).AlignLeft().Text("Tel. Nos. 844- 8001 / 844-1086").FontSize(7).FontColor(Colors.Grey.Darken1);
                         //col.Item()
                         //     .PaddingBottom(20)
                         //     .AlignLeft()
@@ -113,7 +113,7 @@ public class PDFService : IPDFService
                                         .AlignLeft()
                                         .AlignTop()
                                         .Text(h)
-                                        .FontSize(9)
+                                        .FontSize(7)
                                         .Bold()
                                         .FontColor(Colors.Black);
                                 }
@@ -132,7 +132,7 @@ public class PDFService : IPDFService
                                         .AlignLeft()
                                         .AlignTop()
                                         .Text($"{value}")
-                                        .FontSize(9)
+                                        .FontSize(6)
                                         .FontColor(Colors.Black);
 
                                 }

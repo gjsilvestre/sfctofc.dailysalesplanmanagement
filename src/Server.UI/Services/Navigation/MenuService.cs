@@ -45,8 +45,8 @@ public class MenuService : IMenuService
                         {
                             Title = "Purchase Orders",
                             //Icon = Icons.Material.Filled.ArrowRight,
-                            Href = "/",
-                            PageStatus = PageStatus.ComingSoon
+                            Href = "/pages/purchaseorder",
+                            PageStatus = PageStatus.Completed
                         },
                         new()
                         {

@@ -7,7 +7,7 @@ using SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.DTOs;
 
 namespace SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.Queries.GetAll;
 
-public class GetAllPicklistSetsQuery : ICacheableRequest<IEnumerable<PicklistSetDto>>
+public class GetAllPicklistSetsQuery : IRequest<IEnumerable<PicklistSetDto>>
 {
     public string CacheKey => PicklistSetCacheKey.GetAllCacheKey;
     public IEnumerable<string>? Tags => PicklistSetCacheKey.Tags;

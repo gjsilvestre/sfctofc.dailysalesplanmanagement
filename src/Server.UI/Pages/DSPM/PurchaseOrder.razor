@@ -1,0 +1,743 @@
+﻿@page "/pages/purchaseorder"
+
+@using MudBlazor.Utilities
+@using SFCTOFC.DailySalesPlanManagement.Server.UI.Pages.Dashboard.Components
+@using SFCTOFC.DailySalesPlanManagement.Application.Common.Security
+@using SFCTOFC.DailySalesPlanManagement.Application.Common.Interfaces.Identity
+@using SFCTOFC.DailySalesPlanManagement.Application.Common.Interfaces
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.Tenants.DTOs
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Commands.AddEdit
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.GetAll
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.Export
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.Pagination;
+
+@inject IStringLocalizer<PurchaseOrder> L
+@inject IUserProfileState UserProfileState
+@inject ITenantSwitchService TenantSwitchService
+@inject BlazorDownloadFileService BlazorDownloadFileService
+
+
+<style>
+    @@import url("https://cdn.jsdelivr.net/npm/@@fancyapps/ui@@5.0.36/dist/fancybox/fancybox.css");
+
+    .fancybox__container {
+        --fancybox-bg: rgba(24, 24, 27, 0.85);
+        z-index: 9999;
+    }
+
+    html, body {
+        -moz-osx-font-smoothing: grayscale; /* Firefox on macOS */
+        -webkit-font-smoothing: antialiased; /* Chrome, Edge, Safari */
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        font-size: 12px;
+    }
+
+    .mud-menu .mud-icon-button {
+        border-radius: 0 !important;
+    }
+
+    .search .mud-input {
+        line-height: 1px !important;
+    }
+
+    .small-input .mud-input-slot {
+        min-height: 28px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .small-input input {
+        padding: 2px 6px !important;
+    }
+
+    .mud-card-content {
+        flex-grow: 1;
+        padding: 17px;
+        margin-top: -36px !important;
+    }
+
+    .mud-input-control > .mud-input-control-input-container > .mud-input-label-inputcontrol {
+        font-size: 1rem !important;
+        font-weight: 600;
+    }
+
+    .mud-table.mud-data-grid .mud-table-toolbar {
+        padding: 0rem !important;
+    }
+
+    .mud-table-root {
+        margin-top: 1.3ewm !important;
+    }
+
+    .mud-table thead th {
+        /* background-color: #c3c3c3 !important; */
+        /* background-color: #dddddd !important;  */
+        color: black !important;
+        font-weight: 600;
+        /* border: 1px solid #ccc; */
+        /* border-top: 1px solid #eaeaea; */
+    }
+
+    .force-row {
+        display: flex !important;
+        flex-direction: row !important;
+    }
+
+    .gap-20 {
+        column-gap: 190px;
+    }
+
+    .gap-21 {
+        column-gap: 207px;
+    }
+
+    .gap-22 {
+        column-gap: 140px;
+    }
+
+    .gap-19 {
+        /* column-gap: 159px; */
+    }
+
+    .mud-table-bordered th,
+    .mud-table-bordered td {
+        align-content: flex-start;
+        border: 1px solid #E3E3E3;
+        padding: 6px;
+    }
+
+    .mud-table-bordered {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .compact-padding {
+        padding: 9px 16px 0px 16px;
+    }
+
+
+    .ultra-compact-grid .mud-table-row {
+        height: 26px !important;
+    }
+
+    .ultra-compact-grid .mud-table-cell {
+        padding: 2px 6px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .mud-data-grid .mud-table-foot {
+        display: none !important;
+    }
+
+    .mud-table.mud-table-striped tbody tr:nth-child(odd) {
+        background-color: #fafafa !important;
+    }
+
+    .mud-table.mud-table-striped tbody tr:nth-child(even) {
+        background-color: #ebebeb !important;
+    }
+
+    .mud-table.mud-table-hover tbody tr:hover {
+        background-color: #00baef !important;
+        color: white;
+        cursor: pointer;
+    }
+
+    .mud-datagrid-header {
+        border-bottom: 1px solid #E6E6E6;
+    }
+
+    .mud-datagrid-pager .mud-select {
+        margin-left: auto !important;
+    }
+
+    .custom-pager .mud-datagrid-pager {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+<PageTitle>@Title</PageTitle>
+
+<ErrorBoundary>
+    <MudCard>
+        <MudCardContent>
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mt-7">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.ShoppingCartCheckout" Color="Color.Primary" Size="Size.Large" />
+                    <MudText Typo="Typo.h3" Style="color: black;">
+                        Purchase Order
+                    </MudText>
+                </MudStack>
+                <MudStack Spacing="0" AlignItems="AlignItems.End">
+                    <MudToolBar Dense WrapContent="true" Class="py-1 px-0">
+                        <MudButton Disabled="@_loading" OnClick="@(() => _drawerPrintPurchaseOrder = true)">
+                            <MudIcon Icon="@Icons.Material.Filled.LibraryBooks" Size="Size.Small" Color="Color.Info" Style="margin: 5px" />
+                            Export to Excel
+                        </MudButton>
+                    </MudToolBar>
+                </MudStack>
+            </MudStack>
+
+        </MudCardContent>
+    </MudCard>
+
+    <MudDataGrid T="PurchaseOrderDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)" RowClick="OnRowClickPurchaseOrder"
+                 FixedHeader="true" FixedFooter="false" Loading="@_loading" ColumnResizeMode="ResizeMode.Column"
+                 Striped="true" Dense="true" Hover="true" @ref="_dataGridPurchaseOrder" RowsPerPage="20" Style="height:100%; overflow:auto;">
+        <ToolBarContent>
+            <MudStack Row Spacing="0" Class="flex-grow-1 mb-5" Justify="Justify.SpaceBetween">
+                <MudStack Row AlignItems="AlignItems.Start">
+                    <MudStack Spacing="0">
+                        <div style="width: fit-content;">
+                            <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                                @* SEACH FIELD *@
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Dense="true"
+                                              Class="search small-input mt-3 mb-4 mr-5"
+                                              @bind-Value="_paginationQuery.Keyword"
+                                              Placeholder="@ConstantString.Search"
+                                              Adornment="Adornment.End"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              IconSize="Size.Small"
+                                              Immediate="true"
+                                              Clearable="true">
+                                </MudTextField>
+
+                                <MudTooltip Text="Refresh Dashboard">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small" />
+                                </MudTooltip>
+
+                                <MudButton Disabled="@_loading"
+                                           class="mr-6"
+                                           Size="Size.Small"
+                                           OnClick="@(() => OnAddCustomerPO())">
+                                    <MudIcon Icon="@Icons.Material.Filled.PlaylistAdd" Size="Size.Small" Style="margin: 3px" Color="Color.Info" />
+                                    Add Customer PO
+                                </MudButton>
+                            </MudStack>
+                        </div>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </ToolBarContent>
+
+        <Columns>
+            <TemplateColumn HeaderStyle="width:60px" class="mt-5" Title="@ConstantString.Actions" Sortable="false" StickyLeft="true">
+                <CellTemplate>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                        <MudIconButton Icon="@Icons.Material.Filled.EditNote" Color="Color.Info" Size="Size.Small" Disabled="!_accessRights.Edit" />
+                    </div>
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn T="PurchaseOrderDto" TProperty="string" Property="x => x.PurchaseOrderNo" Title="Purchase Order No" 
+                            HeaderStyle="width: 150px; min-width: 150px; max-width: 150px; white-space: nowrap;"
+                            CellStyle="width: 150px; min-width: 150px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: red; font-weight: bold;"
+                            CellStyleFunc="GetRefIdBorderStyle" />
+            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.PurchaseOrderDate" Title="PO Date">
+                <CellTemplate>
+                    @(context.Item.PurchaseOrderDate?.ToString("MMM dd, yyyy") ?? "")
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.OutletName" Title="Outlet Name" />
+            <PropertyColumn Property="x => x.OutletAddress" Title="Address" />
+            <PropertyColumn Property="x => x.OutletProvince" Title="Province" />
+            <PropertyColumn Property="x => x.OutletRegion" Title="Region" />
+            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.DeliveryDate" Title="Delivery Date">
+                <CellTemplate>
+                    @(context.Item.DeliveryDate?.ToString("MMM dd, yyyy") ?? "")
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.CancelDate" Title="Cancel Date">
+                <CellTemplate>
+                    @(context.Item.CancelDate?.ToString("MMM dd, yyyy") ?? "")
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.Salesman" Title="Salesman" />
+            <PropertyColumn T="PurchaseOrderDto" TProperty="string" Property="x => x.Status" Title="Status" Width="150px" StickyRight="true" CellStyleFunc="GetApprovalStatusStyle" />
+        </Columns>
+
+        <NoRecordsContent>
+            <MudText>@ConstantString.NoRecords</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText>@ConstantString.Loading</MudText>
+        </LoadingContent>
+        <PagerContent>
+            <MudDataGridPager PageSizeOptions="@(new[] { 10, 15, 30, 50, 100, 500, 1000 })" />
+        </PagerContent>
+    </MudDataGrid>  
+</ErrorBoundary>
+
+<MudDrawer @bind-Open="_drawerAddCustomerPO"
+           Responsive="true"
+           Anchor="Anchor.Right"
+           Elevation="20"
+           Variant="DrawerVariant.Temporary"
+           Width="850px"
+           DisableOverlay="false"
+           Class="pa-1">
+
+    <MudDrawerHeader>
+        <MudStack Class="w-100" Direction="Column" Spacing="0">
+            <MudStack Class="force-row gap-19" Style="width: 810px;" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Start">
+                <MudText Typo="Typo.h4" Color="Color.Info" Class="fw-bold">
+                    <b>Add Customer PO</b>
+                </MudText>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Close"
+                               Size="Size.Small"
+                               Class="p-0 min-w-0"
+                               Color="Color.Default"
+                               OnClick="@(() => _drawerAddCustomerPO = false)" />
+
+            </MudStack>
+        </MudStack>
+    </MudDrawerHeader>
+
+    <MudCardContent>
+
+    </MudCardContent>
+
+</MudDrawer>
+
+<MudDrawer @bind-Open="_drawerPurchaseOrder"
+           Responsive="true"
+           Anchor="Anchor.Right"
+           Elevation="20"
+           Variant="DrawerVariant.Temporary"
+           Width="75%"
+           DisableOverlay="false"
+           Class="pa-1">
+    
+    <MudDrawerHeader>
+        <div style="display:flex; justify-content:space-between; align-items:start; width:100%;">
+
+            <!-- LEFT SIDE -->
+            <div>
+                <div style="font-size:1.50rem; font-weight:bold;">
+                    <MudText Typo="Typo.h3" Color="Color.Info">
+                        Purchase Order
+                    </MudText>
+
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div style="display:flex; gap:6px; align-items:start;">
+                <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Size="Size.Small" Color="Color.Primary" OnClick="Previous" />
+                <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" Size="Size.Small" Color="Color.Primary" OnClick="Next" />
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Default" OnClick="@(() => _drawerPurchaseOrder = false)" />
+            </div>
+
+        </div>
+    </MudDrawerHeader>
+
+    <MudCardContent>
+        <MudStack Direction="Row" Class="force-row mb-7" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Start" Spacing="2">
+            <MudStack Direction="Column" Column Spacing="0" Class="mb-5">
+                <MudStack Class="force-row mt-3" Justify="Justify.FlexStart" AlignItems="AlignItems.Start" Spacing="2">
+                    <MudText Typo="Typo.h3" Color="Color.Error">
+                        <b>@_currentDto.PurchaseOrderNo</b>
+                    </MudText>
+                    @if (!string.IsNullOrEmpty(_currentDto.Status))
+                    {
+                        <MudChip T="string"
+                                 Color="@GetStatusColor(_currentDto.Status)"
+                                 Size="Size.Small"
+                                 Variant="Variant.Filled"
+                                 Label="true">
+                            @_currentDto.Status
+                        </MudChip>
+                    }
+                </MudStack>
+            </MudStack>
+
+            <MudStack Class="force-row mt-1" Justify="Justify.FlexEnd" AlignItems="AlignItems.Start" Spacing="2">
+                <MudButton Disabled="@_loading">
+                    <MudIcon Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Info" Style="margin: 5px" />
+                    Update
+                </MudButton>
+                <MudButton Disabled="@_loading">
+                    <MudIcon Icon="@Icons.Material.Filled.Input" Size="Size.Small" Color="Color.Info" Style="margin: 5px" />
+                    Cancel
+                </MudButton>
+            </MudStack>
+        </MudStack>
+
+        <MudForm Model="_model" @ref="@_form" Validation="@(Validator.ValidateValue(_model))">
+            <MudGrid Spacing="2">
+                <MudItem xs="3">
+                    <MudDatePicker Label="Purchase Order Date"
+                                   Margin="Margin.Dense"
+                                   For="@(() => _model.PurchaseOrderDate)"
+                                   @bind-Date="_model.PurchaseOrderDate"
+                                   DateFormat="yyyy-MM-dd"
+                                   Variant="Variant.Outlined"
+                                   PickerVariant="PickerVariant.Inline" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudTextField Label="Outlet Name"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.OutletName)"
+                                  @bind-Value="_model.OutletName"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="6">
+                    <MudTextField Label="Address"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.OutletAddress)"
+                                  @bind-Value="_model.OutletAddress"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudTextField Label="Province"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.OutletProvince)"
+                                  @bind-Value="_model.OutletProvince"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudTextField Label="Region"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.OutletRegion)"
+                                  @bind-Value="_model.OutletRegion"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudDatePicker Label="Delivery Date"
+                                   Margin="Margin.Dense"
+                                   For="@(() => _model.DeliveryDate)"
+                                   @bind-Date="_model.DeliveryDate"
+                                   DateFormat="yyyy-MM-dd"
+                                   Variant="Variant.Outlined"
+                                   PickerVariant="PickerVariant.Inline" />
+                </MudItem>
+                <MudItem xs="3">
+                    <MudTextField Label="Cancel Date"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.CancelDate)"
+                                  @bind-Value="_model.CancelDate"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudTextField Label="Salesman"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.Salesman)"
+                                  @bind-Value="_model.Salesman"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+
+        <MudItem xs="12" sm="12" Class="mt-5">
+            <MudStack Row Justify="Justify.FlexEnd">
+                <MudButton Disabled="@_loading"
+                           Color="Color.Primary" Variant="Variant.Text"
+                           StartIcon="@Icons.Material.Outlined.PlaylistAdd" Class="mb-2"
+                           >
+                    Add Details
+                </MudButton>
+            </MudStack>
+
+            <MudDataGrid T="PurchaseOrderDetailsDto"
+                         Items="@_purchaseOrderDetails"
+                         @ref="_dataGridPurchaseOrderDetails"
+                         Class="mb-10" Dense="true" Filterable="false"
+                         HorizontalScrollbar="true" 
+                         Hover="true" Bordered="true" EditMode="DataGridEditMode.Cell"
+                         EditTrigger="DataGridEditTrigger.OnRowClick" Editable="true"
+                         ReadOnly="false" Style="height:100%; overflow:auto;" Striped="true">
+                <Columns>
+                    <!-- Actions column -->
+                    <TemplateColumn Title="@ConstantString.Actions" Sortable="false" FlexWidth="false" Width="75px">
+                        <EditTemplate Context="context">
+                            <div class="d-flex justify-center gap-2">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" Class="bordered-btn"
+                                                />
+                            </div>
+                        </EditTemplate>
+                    </TemplateColumn>
+
+                    <PropertyColumn Property="x => x.SKUNo" Title="SKU No" Sortable="false" FlexWidth="false" Width="150px" ColumnStyle="min-width:150px; max-width:150px; width:150px;" HeaderStyle="min-width:150px; max-width:150px; width:150px;">
+                        <EditTemplate Context="context">
+                            <MudTextField @bind-Value="context.Item.SKUNo" InputType="InputType.Text" Variant="Variant.Outlined" Dense="true" Margin="Margin.None" Style="width:100%; height:25px;" />
+                        </EditTemplate>
+                    </PropertyColumn>
+
+                    <PropertyColumn Property="x => x.UPC" Title="UPC" Sortable="false" FlexWidth="false" Width="150px" ColumnStyle="min-width:150px; max-width:150px; width:150px;" HeaderStyle="min-width:150px; max-width:150px; width:150px;">
+                        <EditTemplate Context="context">
+                            <MudTextField @bind-Value="context.Item.UPC" InputType="InputType.Text" Variant="Variant.Outlined" Dense="true" Margin="Margin.None" Style="width:100%; height:25px;" />
+                        </EditTemplate>
+                    </PropertyColumn>
+
+                    <PropertyColumn Property="x => x.Description" Title="Description" Sortable="false" FlexWidth="false" Width="450px" ColumnStyle="min-width:450px; max-width:450px; width:450px;" HeaderStyle="min-width:450px; max-width:450px; width:450px;">
+                        <EditTemplate Context="context">
+                            <MudTextField @bind-Value="context.Item.Description" InputType="InputType.Text" Variant="Variant.Outlined" Dense="true" Margin="Margin.None" Style="width:100%; height:25px;" />
+                        </EditTemplate>
+                    </PropertyColumn>
+
+                    <PropertyColumn Property="x => x.Quantity" Title="Quantity" Sortable="false" FlexWidth="false" Width="100px" ColumnStyle="min-width:100px; max-width:100px; width:100px;" HeaderStyle="min-width:100px; max-width:100px; width:100px;">
+                        <EditTemplate Context="context">
+                            <MudTextField @bind-Value="context.Item.Quantity" InputType="InputType.Number" Variant="Variant.Outlined" Dense="true" Margin="Margin.None" Style="width:100%; height:25px;" />
+                        </EditTemplate>
+                    </PropertyColumn>
+
+                    <PropertyColumn Property="x => x.UOM" Title="UOM" Sortable="false" FlexWidth="false" Width="150px" ColumnStyle="min-width:150px; max-width:150px; width:150px;" HeaderStyle="min-width:150px; max-width:150px; width:150px;">
+                        <EditTemplate Context="context">
+                            <MudTextField @bind-Value="context.Item.UOM" InputType="InputType.Text" Variant="Variant.Outlined" Dense="true" Margin="Margin.None" Style="width:100%; height:25px;" />
+                        </EditTemplate>
+                    </PropertyColumn>
+
+                    <PropertyColumn Property="x => x.BuyCost" Title="Buy Cost" Sortable="false" FlexWidth="false" Width="150px" ColumnStyle="min-width:150px; max-width:150px; width:150px;" HeaderStyle="min-width:150px; max-width:150px; width:150px;">
+                        <EditTemplate Context="context">
+                            <MudTextField @bind-Value="context.Item.BuyCost" InputType="InputType.Number" Variant="Variant.Outlined" Dense="true" Margin="Margin.None" Style="width:100%; height:25px;" />
+                        </EditTemplate>
+                    </PropertyColumn>
+
+                    <PropertyColumn Property="x => x.Amount" Title="Amount" Sortable="false" FlexWidth="false" Width="150px" ColumnStyle="min-width:150px; max-width:150px; width:150px;" HeaderStyle="min-width:150px; max-width:150px; width:150px;">
+                        <EditTemplate Context="context">
+                            <MudTextField @bind-Value="context.Item.Amount" InputType="InputType.Number" Variant="Variant.Outlined" Dense="true" Margin="Margin.None" Style="width:100%; height:25px;" />
+                        </EditTemplate>
+                    </PropertyColumn>
+                </Columns>
+            </MudDataGrid>
+        </MudItem>
+    </MudCardContent>
+</MudDrawer>
+
+<MudDrawer @bind-Open="_drawerPrintPurchaseOrder"
+           Responsive="true"
+           Anchor="Anchor.Right"
+           Elevation="20"
+           Variant="DrawerVariant.Temporary"
+           Width="25%"
+           DisableOverlay="false"
+           Class="pa-1">
+
+    <MudDrawerHeader>
+        <div style="display:flex; justify-content:space-between; align-items:start; width:100%;">
+            <!-- LEFT SIDE -->
+            <div>
+                <div style="font-size:1.50rem; font-weight:bold;">
+                    <MudText Typo="Typo.h3" Color="Color.Info">
+                        Print Purchase Order
+                    </MudText>
+
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div style="display:flex; gap:6px; align-items:start;">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Default" OnClick="@(() => _drawerPrintPurchaseOrder = false)" />
+            </div>
+        </div>
+    </MudDrawerHeader>
+
+    <MudCardContent>
+        <MudStack Spacing="0" AlignItems="AlignItems.End">
+            <MudToolBar Dense WrapContent="true" Class="py-1 px-0 mb-5">
+                <MudButton Disabled="@_loading" Color="Color.Primary" Variant="Variant.Text"
+                           StartIcon="@Icons.Material.Outlined.Print"
+                           OnClick="@(() => PrintPOReport())">
+                    Print
+                </MudButton>
+            </MudToolBar>
+        </MudStack>
+
+        <MudGrid Spacing="5" AlignItems="AlignItems.FlexStart" Justify="Justify.FlexStart">
+            <MudItem xs="6">
+                <MudDatePicker Label="Date" @bind-Date="_purchaseOrderDatePrinting"
+                               For="@(() => _purchaseOrderDatePrinting)" Required="true" Margin="Margin.Dense"
+                               RequiredError="Date is required!" Variant="Variant.Outlined">
+                </MudDatePicker>
+            </MudItem>
+            <MudItem xs="6">
+                <MudSelect T="string" Variant="Variant.Outlined"
+                           Label="Report Type" Dense="true" Margin="Margin.Dense"
+                           Required="true" RequiredError="Report Type is required!"
+                           Style="width:100%;" @bind-Value="_selectedReportType">
+                    <MudSelectItem Value=@("PDF")>PDF</MudSelectItem>
+                    <MudSelectItem Value=@("Excel")>Excel</MudSelectItem>
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </MudCardContent>
+</MudDrawer>
+
+@code {
+    public string Title { get; set; } = "Purchase Order";
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+    [CascadingParameter] private UserProfile? UserProfile { get; set; }
+    private PurchaseOrderAccessRights _accessRights = new();
+    private PaginationQueryPurchaseOrder _paginationQuery { get; } = new();
+    private bool _loading;
+
+    private bool _drawerAddCustomerPO;
+    private bool _drawerPurchaseOrder;
+    private bool _drawerPrintPurchaseOrder;
+
+    private DateTime? _purchaseOrderDatePrinting;
+    private string? _selectedReportType;
+
+    private int _currentIndex = 0;
+    private PurchaseOrderDto _currentDto = new();
+    private List<PurchaseOrderDto> _List = new();
+    private MudDataGrid<PurchaseOrderDto> _dataGridPurchaseOrder = default!;
+
+    private MudForm? _form;
+    private AddEditCommandPurchaseOrder _model = new();
+
+    private MudDataGrid<PurchaseOrderDetailsDto> _dataGridPurchaseOrderDetails = default!;
+    private IEnumerable<PurchaseOrderDetailsDto> _purchaseOrderDetails = Enumerable.Empty<PurchaseOrderDetailsDto>();
+
+    private async Task<GridData<PurchaseOrderDto>> ServerReload(GridState<PurchaseOrderDto> state)
+    {
+        try
+        {
+            _loading = true;
+            _paginationQuery.CurrentUser = UserProfile;
+            _paginationQuery.OrderBy = state.SortDefinitions.FirstOrDefault()?.SortBy ?? "Id";
+            _paginationQuery.SortDirection = state.SortDefinitions.FirstOrDefault()?.Descending ?? true
+                                             ? SortDirection.Descending.ToString()
+                                             : SortDirection.Ascending.ToString();
+            _paginationQuery.PageNumber = state.Page + 1;
+            _paginationQuery.PageSize = state.PageSize;
+
+            var result = await Mediator.Send(_paginationQuery).ConfigureAwait(false);
+            _List = result.Items?.ToList() ?? new List<PurchaseOrderDto>();
+            return new GridData<PurchaseOrderDto> { TotalItems = result.TotalItems, Items = _List };
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private string GetRefIdBorderStyle(PurchaseOrderDto item)
+    {
+        if (item == null || string.IsNullOrWhiteSpace(item.Status)) return "";
+
+        return item.Status.ToUpper() switch
+        {
+            "APPROVED" => "border-left: 5px solid  #00c874; font-weight: bold; padding-left: 8px;",
+            "PENDING APPROVAL" => "border-left: 5px solid #fb275d; font-weight: bold; padding-left: 8px;",
+            _ => "border-left: 5px solid gray; font-weight: bold; padding-left: 8px;"
+        };
+    }
+
+    private string GetApprovalStatusStyle(PurchaseOrderDto item)
+    {
+        if (item == null || string.IsNullOrEmpty(item.Status)) return string.Empty;
+
+        return item.Status.ToUpper() switch
+        {
+            "APPROVED" => "background-color: #00c874; color: white; text-align: center;",
+            "PENDING APPROVAL" => "background-color: #fb275d; color: white; text-align: center;",
+            _ => "background-color: #e0e0e0; color: black; text-align: center;"
+        };
+    }
+
+    private Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Approved" => Color.Success,
+            "Pending Approval" => Color.Warning,
+            "Cancelled" => Color.Error,
+            _ => Color.Default
+        };
+    }
+
+    private void OnAddCustomerPO()
+    {
+        // _model = new AddEditJRQCommand
+        // {
+        //     Requestor = !string.IsNullOrEmpty(UserProfile?.DisplayName)
+        //         ? UserProfile.DisplayName
+        //         : "Unknown User"
+        // };
+
+        _drawerAddCustomerPO = true;
+    }
+
+    private async Task Previous()
+    {
+        if (_List is null || _List.Count == 0) return;
+        if (_currentIndex > 0)
+        {
+            _currentIndex--;
+            // LoadJobRequestAtCurrentIndex();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task Next()
+    {
+        if (_List is null || _List.Count == 0) return;
+        if (_currentIndex < _List.Count - 1)
+        {
+            _currentIndex++;
+            // LoadJobRequestAtCurrentIndex();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnRowClickPurchaseOrder(DataGridRowClickEventArgs<PurchaseOrderDto> args)
+    {
+        _currentDto = args.Item;
+        if (_currentDto == null) return;
+
+        _model = Mapper.Map<AddEditCommandPurchaseOrder>(_currentDto);
+        _purchaseOrderDetails = await Mediator.Send(new GetAllPurchaseOrderDetailsQuery { PurchaseOrderId = _currentDto.Id });
+
+        _drawerPurchaseOrder = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task PrintPOReport()
+    {
+        try
+        {
+            var request = new ExportPurchaseOrderQuery
+            {
+                PurchaseOrderDate = _purchaseOrderDatePrinting,
+                ExportType = _selectedReportType
+            };
+
+            var result = await Mediator.Send(request);
+            if (result.Succeeded)
+            {
+                await BlazorDownloadFileService.DownloadFileAsync($"{L["PurchaseOrder"]}.pdf", result.Data!, "application/octet-stream");
+                Snackbar.Add($"{ConstantString.ImportSuccess}", Severity.Info);
+            }
+        }
+        catch (Exception ex)
+        {
+            
+            throw;
+        }
+    }
+}
