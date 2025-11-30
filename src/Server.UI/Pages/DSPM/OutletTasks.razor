@@ -1,0 +1,284 @@
+﻿@page "/pages/outlet-tasks"
+
+@using SFCTOFC.DailySalesPlanManagement.Application.DSPMOutletTasks.Commands.AddEdit
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Commands
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPMSalesmanDailyPlan.Queries
+@inject AuthenticationStateProvider AuthStateProvider
+
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-4" Elevation="0">
+
+    <MudStack Direction="Row" Justify="Justify.SpaceBetween" Class="mb-4">
+        <MudText Typo="Typo.h5"><b>Outlet Tasks</b></MudText>
+
+        <MudButton Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="OnAddTask">
+            Assign New Task
+        </MudButton>
+    </MudStack>
+ 
+
+    <MudDataGrid T="OutletTasksDto"
+                 @ref="_dataGrid"
+                 ServerData="ServerReload"
+                 Dense="true"
+                 Hover="true"
+                 Bordered="true"
+                 Loading="_loading"
+                 RowsPerPage="10">
+
+        <Columns>
+            @* <PropertyColumn Property="x => x.Id" Title="ID" Width="70px" /> *@
+
+            <PropertyColumn Property="x => x.TaskName" Title="Task" />
+
+            <PropertyColumn Property="x => x.AssignedTo!.UserName" Title="Salesman" />
+
+            <PropertyColumn Property="x => x.CreatedBy!.UserName" Title="Assigned By" />
+
+            <PropertyColumn Property="x => x.IsCompleted" Title="Done?" />
+
+            <PropertyColumn Property="x => x.CreatedAt" Title="Created"
+                            Format="dd MMM yyyy hh:mm tt" />
+
+            <TemplateColumn Title="Actions" Width="150px">
+                <CellTemplate>
+                    <MudButton Size="Size.Small"
+                               Variant="Variant.Text"
+                               Color="Color.Info"
+                               StartIcon="@Icons.Material.Filled.Visibility"
+                               OnClick="(() => ViewTask(context.Item))">
+                        View
+                    </MudButton>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+
+    </MudDataGrid>
+
+</MudPaper>
+
+
+<MudDrawer @bind-Open="_drawerAddTask"
+           Anchor="Anchor.Right"
+           Width="500px"
+           Variant="DrawerVariant.Temporary"
+           Elevation="20">
+
+    <MudDrawerHeader>
+        <MudText Typo="Typo.h6"><b>Assign Task</b></MudText>
+    </MudDrawerHeader>
+
+    <MudCardContent>
+
+        <MudTextField @bind-Value="_model.TaskName"
+                      Label="Task Name"
+                      Variant="Variant.Outlined"
+                      Required />
+
+        @* <MudTextField @bind-Value="_model.Notes"
+                      Label="Notes"
+                      Variant="Variant.Outlined"
+                      Lines="3" /> *@
+
+      @*   <p>@_dailyPlans.Count plans loaded.</p>
+        @foreach (var plan in _dailyPlans)
+        {
+            <p>@plan.OutletName - @plan.UserName - @plan.PlanDate</p>
+        } *@
+
+        @* <MudSelect T="SalesmanDailyPlansDto"
+                   Value="_selectedPlan"
+                   ValueChanged="OnDailyPlanChanged"
+                   Label="Select Outlet (from Daily Plan)"
+                   SearchFunc="SearchDailyPlans"
+                   ToStringFunc="@(plan => $"{plan.OutletName} ({plan.UserName}) - {plan.PlanDate?.ToString("dd MMM yyyy")}")">
+            @foreach (var plan in _dailyPlans)
+            {
+                <MudSelectItem Value="@plan">
+                    @plan.OutletName (@plan.UserName) - @plan.PlanDate?.ToString("dd MMM yyyy")
+                </MudSelectItem>
+            }
+        </MudSelect>
+ *@
+
+
+        <MudSelect T="int" Value="_model.SalesmanDailyPlanId" 
+        ValueChanged="OnDailyPlanChanged" Label="Select Outlet (from Daily Plan)"> @foreach (var plan in _dailyPlans) {
+        <MudSelectItem Value="@plan.Id"> @plan.OutletName (@plan.UserName) - @plan.PlanDate?.ToString("dd MMM yyyy") </MudSelectItem>
+                }
+ </MudSelect>
+
+
+        <MudButton Class="mt-4"
+                   Color="Color.Primary"
+                   OnClick="SaveTask">
+            Save
+        </MudButton>
+    </MudCardContent>
+
+</MudDrawer>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+    [CascadingParameter] private UserProfile? UserProfile { get; set; }
+    private MudDataGrid<OutletTasksDto> _dataGrid = default!;
+    private bool _loading;
+    private List<OutletTasksDto> _list = new();
+    private int _currentUserId;
+    private int _supervisorId = 1; // hardcode for now or load from UserProfile if available
+
+
+    private List<SalesmanDailyPlansDto> _dailyPlans = new();
+    private List<UsersDto> _salesmen = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load today's daily plans (DTO)
+        _dailyPlans = (await Mediator.Send(new GetDailyPlansQuery())).ToList();
+
+
+    }
+    private SalesmanDailyPlansDto? _selectedPlan;
+
+    // private void OnDailyPlanChanged(SalesmanDailyPlansDto plan)
+    // {
+    //     _selectedPlan = plan;
+    //     if (plan != null)
+    //     {
+    //         _model.SalesmanDailyPlanId = plan.Id;
+    //         _model.AssignedToUserId = plan.UserId;
+    //     }
+    // }
+
+    private void OnDailyPlanChanged(int dailyPlanId) { 
+        _model.SalesmanDailyPlanId = dailyPlanId; 
+        var selectedPlan = _dailyPlans.FirstOrDefault(p => p.Id == dailyPlanId); 
+        if (selectedPlan != null) _model.AssignedToUserId = selectedPlan.UserId; }
+    private IEnumerable<SalesmanDailyPlansDto> SearchDailyPlans(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return _dailyPlans;
+
+        return _dailyPlans.Where(x =>
+            (x.OutletName != null && x.OutletName.Contains(value, StringComparison.OrdinalIgnoreCase)) ||
+            (x.UserName != null && x.UserName.Contains(value, StringComparison.OrdinalIgnoreCase)) ||
+            (x.PlanDate.HasValue && x.PlanDate.Value.ToString("dd/MM/yyyy").Contains(value))
+        );
+    }
+
+
+    
+    public class GetAllUsersQuery : IRequest<IEnumerable<UsersDto>> { }
+
+    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IEnumerable<UsersDto>>
+    {
+        private readonly IApplicationDbContextFactory _dbContextFactory;
+        private readonly IMapper _mapper;
+
+        public GetAllUsersQueryHandler(IApplicationDbContextFactory dbContextFactory, IMapper mapper)
+        {
+            _dbContextFactory = dbContextFactory;
+            _mapper = mapper;
+        }
+
+        public async Task<IEnumerable<UsersDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        {
+            await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+            return await db.Users
+                .ProjectTo<UsersDto>(_mapper.ConfigurationProvider)
+                .ToListAsync(cancellationToken);
+        }
+    }
+
+    private async Task<GridData<OutletTasksDto>> ServerReload(GridState<OutletTasksDto> state)
+    {
+        try
+        {
+            _loading = true;
+
+            var result = await Mediator.Send(new GetAllOutletTasksQuery());
+
+            var items = result.ToList();
+
+            return new GridData<OutletTasksDto>
+            {
+                TotalItems = items.Count,
+                Items = items
+                    .Skip(state.Page * state.PageSize)
+                    .Take(state.PageSize)
+                    .ToList()
+            };
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+    private void OpenAddTaskDrawer(SalesmanDailyPlans plan)
+    {
+        _model = new CreateOutletTaskCommand();
+
+        _model.SalesmanDailyPlanId = plan.Id;
+        _model.AssignedToUserId = plan.UserId;
+        _model.CreatedByUserId = _supervisorId;
+
+        // Pre-filter daily plans if needed
+        _dailyPlans = _dailyPlans.Where(p => p.UserId == plan.UserId).ToList();
+
+        _drawerAddTask = true;
+    }
+
+
+
+    private void OnAddTask()
+    {
+        // open drawer
+        _drawerAddTask = true;
+    }
+
+    private void ViewTask(OutletTasksDto task)
+    {
+        _selectedTask = task;
+        _drawerViewTask = true;
+    }
+
+    private bool _drawerAddTask;
+    private bool _drawerViewTask;
+
+    private OutletTasksDto _selectedTask = new();
+
+    private CreateOutletTaskCommand _model = new();
+
+    private async Task SaveTask()
+    {
+        if (_model.SalesmanDailyPlanId == 0)
+        {
+            Snackbar.Add("Please select an outlet first", Severity.Warning);
+            return;
+        }
+
+        // Always assign supervisor as creator (ID = 2)
+        _model.CreatedByUserId = 2;
+
+        // Optionally, also ensure AssignedToUserId is set from selected plan
+        if (_model.AssignedToUserId == 0 && _dailyPlans.Any())
+        {
+            var selectedPlan = _dailyPlans.FirstOrDefault(p => p.Id == _model.SalesmanDailyPlanId);
+            if (selectedPlan != null)
+                _model.AssignedToUserId = selectedPlan.UserId;
+        }
+
+        await Mediator.Send(_model);
+
+        Snackbar.Add("Task added successfully", Severity.Success);
+        _drawerAddTask = false;
+    }
+
+
+
+}

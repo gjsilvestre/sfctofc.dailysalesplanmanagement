@@ -36,6 +36,7 @@
     </ItemGroup>
     <ItemGroup>
       <Folder Include="Features\Distributors\DTOs\" />
+      <Folder Include="OutletTasks\Commands\Create\" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />

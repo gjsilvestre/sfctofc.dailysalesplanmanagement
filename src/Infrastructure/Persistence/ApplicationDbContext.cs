@@ -30,6 +30,12 @@ public class ApplicationDbContext : IdentityDbContext<
     public DbSet<SalesOrder> SalesOrder { get; set; }
     public DbSet<SalesOrderDetails> SalesOrderDetails { get; set; }
 
+    public DbSet<Users> Users { get; set; }
+    public DbSet<SalesmanDailyPlans> SalesmanDailyPlans { get; set; }
+    public DbSet<DistributorOutlet> DistributorOutlet { get; set; }
+    public DbSet<OutletSalesOrder> OutletSalesOrder { get; set; }
+    public DbSet<MBLProducts> MBLProducts { get; set; }
+    public DbSet<OutletTasks> OutletTasks { get; set; }
     #endregion
 
     #region DEFAULT ENTITIES

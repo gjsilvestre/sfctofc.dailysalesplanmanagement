@@ -113,3 +113,29 @@ public static class SalesOrderCacheKey
 }
 
 #endregion
+
+
+#region SALESMANDAILYPLAN
+
+public static class SalesmanDailyPlanCacheKey
+{
+    public const string GetAllCacheKey = "all-SalesmanDailyPlan";
+
+    public static string GetSalesmanDailyPlanByIdCacheKey(int id)
+    {
+        return $"GetSalesmanDailyPlanById,{id}";
+    }
+
+    public static string GetPaginationCacheKey(string parameters)
+    {
+        return $"PurchaseOrderWithPaginationQuery,{parameters}";
+    }
+    public static IEnumerable<string>? Tags => new string[] { "SalesmanDailyPlan" };
+    public static void Refresh()
+    {
+        FusionCacheFactory.RemoveByTags(Tags);
+    }
+}
+
+
+#endregion

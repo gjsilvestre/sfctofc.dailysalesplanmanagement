@@ -1,7 +1,157 @@
 ﻿
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
 
+public class SalesmanDailyPlansDto
+{
+    public int Id { get; set; } // SalesmanDailyPlanId
+    public int UserId { get; set; } // Salesman
+    public string UserName { get; set; } // Salesman name
+    public int OutletId { get; set; } // DistributorOutlet Id
+    public string OutletName { get; set; } // DistributorOutlet name
+    public DateTime? PlanDate { get; set; }
+
+
+    public decimal? TargetSales { get; set; }
+    public int? TargetQty { get; set; }
+    public decimal? ActualSales { get; set; }
+    public string? Frequency { get; set; }
+    public string? Status { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? CheckedIn { get; set; }
+    public DateTime? CheckedOut { get; set; }
+    public DateTime? Skipped { get; set; }
+    public string? SelfiePath { get; set; }
+    public TimeSpan? CallTime { get; set; }
+    public string? SkippedRemarks { get; set; }
+
+    public ICollection<OutletTasks> Tasks { get; set; }
+
+    private class Mapping : Profile
+    {
+        public Mapping()
+        {
+            CreateMap<SalesmanDailyPlans, SalesmanDailyPlansDto>().ReverseMap();
+
+            CreateMap<SalesmanDailyPlansDto, SalesmanDailyPlans>(MemberList.None);
+        }
+    }
+}
+
+
+
+
+
+
+public class OutletTasksDto
+{
+    public int Id { get; set; }
+
+    // link to daily plan
+
+    public int SalesmanDailyPlanId { get; set; }
+
+    [ForeignKey(nameof(SalesmanDailyPlanId))]
+    public SalesmanDailyPlans? DailyPlan { get; set; }
+
+
+    public int CreatedByUserId { get; set; }
+
+    [ForeignKey(nameof(CreatedByUserId))]
+    public Users? CreatedBy { get; set; }
+
+
+    public int? AssignedToUserId { get; set; }
+
+    [ForeignKey(nameof(AssignedToUserId))]
+    public Users? AssignedTo { get; set; }
+
+    public string? TaskName { get; set; }
+    public string? Notes { get; set; }
+
+    public string? CompletedRemarks { get; set; }
+
+
+    public bool? IsCompleted { get; set; } = false;
+    public DateTime? CompletedAt { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+    private class Mapping : Profile
+    {
+        public Mapping()
+        {
+            CreateMap<OutletTasks, OutletTasksDto>().ReverseMap();
+            CreateMap<OutletTasksDto, OutletTasks>(MemberList.None);
+        }
+    }
+}
+
+public class UsersDto
+{
+    public int Id { get; set; }
+    public string? UserName { get; set; }
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
+    public string? PasswordHash { get; set; }
+    public string? Email { get; set; }
+    public string? Position { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+
+    private class Mapping : Profile
+    {
+        public Mapping()
+        {
+            CreateMap<Users, UsersDto>().ReverseMap();
+            CreateMap<UsersDto, Users>(MemberList.None);
+        }
+    }
+}
+
+
 #region OUTLETS
+
+
+public class DistributorOutletDto
+{
+    public int Id { get; set; }
+    public string? Distributor { get; set; }
+    public int Salesman { get; set; }
+    public string? Name { get; set; }
+    public string? Channel { get; set; }
+    public string? Owner { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? Address { get; set; }
+    public string? Region { get; set; }
+    public string? Province { get; set; }
+    public string? City { get; set; }
+    public string? Baranggay { get; set; }
+    public string? Route { get; set; }
+    public string? Frequency { get; set; }
+    public int? CallSequence { get; set; }
+    public string? Image { get; set; }
+    public double? Latitude { get; set; } //float sa mssql
+    public double? Longtitude { get; set; } //float sa mssql 
+    public string? Comments { get; set; }
+    public string? SubRoute1 { get; set; }
+    public string? SubRoute2 { get; set; }
+    public string? SubRoute3 { get; set; }
+    public string? SubRoute4 { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
+    private class Mapping : Profile
+    {
+        public Mapping()
+        {
+            CreateMap<DistributorOutlet, DistributorOutletDto>().ReverseMap();
+            CreateMap<DistributorOutletDto, DistributorOutlet>(MemberList.None);
+        }
+    }
+}
 
 public class OutletDto
 {
