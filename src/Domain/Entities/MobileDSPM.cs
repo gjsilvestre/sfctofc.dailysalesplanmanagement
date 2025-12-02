@@ -31,8 +31,6 @@ public class MBLProducts
     public string? Image { get; set; }
 }
 
-
-
 public class OutletSalesOrder
 {
     public int Id { get; set; }
@@ -59,8 +57,6 @@ public class OutletSalesOrder
     public DateTime? CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }
-
-
 public class OutletTasks
 {
     public int Id { get; set; }
@@ -71,7 +67,6 @@ public class OutletTasks
 
     [ForeignKey(nameof(SalesmanDailyPlanId))]
     public SalesmanDailyPlans? DailyPlan { get; set; }
-
 
     public int CreatedByUserId { get; set; }
 
@@ -95,6 +90,8 @@ public class OutletTasks
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+
 }
 
 
@@ -131,11 +128,11 @@ public class SalesmanDailyPlans
 {
     public int Id { get; set; }
     public int UserId { get; set; } // from Users
-    public int OutletId { get; set; } // from DistributorOutlet
+    public int OutletId { get; set; }
 
-    // NAVIGATION PROPERTIES
+    // ONE navigation only
     [ForeignKey(nameof(OutletId))]
-    public DistributorOutlet? Outlet { get; set; }  // <-- add this
+    public DistributorOutlet? Outlet { get; set; }
 
     [ForeignKey(nameof(UserId))]
     public Users? User { get; set; }
@@ -154,7 +151,7 @@ public class SalesmanDailyPlans
     public string? SelfiePath { get; set; }
     public TimeSpan? CallTime { get; set; }
     public string? SkippedRemarks { get; set; }
-
+   
     public ICollection<OutletTasks> Tasks { get; set; }
 }
 

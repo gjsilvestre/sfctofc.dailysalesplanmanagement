@@ -8,7 +8,13 @@ public class SalesmanDailyPlansDto
     public int Id { get; set; } // SalesmanDailyPlanId
     public int UserId { get; set; } // Salesman
     public string UserName { get; set; } // Salesman name
-    public int OutletId { get; set; } // DistributorOutlet Id
+    //  FK that already exists in DB
+    public int OutletId { get; set; }
+
+    // ONE navigation only
+    [ForeignKey(nameof(OutletId))]
+    public DistributorOutlet? Outlet { get; set; }
+
     public string OutletName { get; set; } // DistributorOutlet name
     public DateTime? PlanDate { get; set; }
 
@@ -33,17 +39,24 @@ public class SalesmanDailyPlansDto
     {
         public Mapping()
         {
-            CreateMap<SalesmanDailyPlans, SalesmanDailyPlansDto>().ReverseMap();
+            CreateMap<OutletTasks, OutletTasksDto>()
+                .ForMember(d => d.OutletName,
+                    o => o.MapFrom(s => s.DailyPlan!.Outlet!.Name))
 
-            CreateMap<SalesmanDailyPlansDto, SalesmanDailyPlans>(MemberList.None);
+                .ForMember(d => d.OutletAddress,
+                    o => o.MapFrom(s => s.DailyPlan!.Outlet!.Address))
+
+                .ForMember(d => d.OutletCity,
+                    o => o.MapFrom(s => s.DailyPlan!.Outlet!.City))
+
+                .ForMember(d => d.OutletProvince,
+                    o => o.MapFrom(s => s.DailyPlan!.Outlet!.Province))
+
+                .ReverseMap();
         }
     }
+
 }
-
-
-
-
-
 
 public class OutletTasksDto
 {
@@ -80,14 +93,32 @@ public class OutletTasksDto
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
+    //for displaying
+    public string? OutletName { get; set; }
+    public string? OutletAddress { get; set; }
+    public string? OutletCity { get; set; }
+    public string? OutletProvince { get; set; }
+    public string? OutletRegion { get; set; }
+
+
     private class Mapping : Profile
     {
         public Mapping()
         {
-            CreateMap<OutletTasks, OutletTasksDto>().ReverseMap();
+            CreateMap<OutletTasks, OutletTasksDto>()
+                .ForMember(d => d.OutletName,
+                    opt => opt.MapFrom(s => s.DailyPlan.Outlet.Name))
+                .ForMember(d => d.OutletAddress,
+                    opt => opt.MapFrom(s => s.DailyPlan.Outlet.Address))
+                .ForMember(d => d.OutletProvince,
+                    opt => opt.MapFrom(s => s.DailyPlan.Outlet.Province))
+                .ForMember(d => d.OutletRegion,
+                    opt => opt.MapFrom(s => s.DailyPlan.Outlet.Region));
+
             CreateMap<OutletTasksDto, OutletTasks>(MemberList.None);
         }
     }
+
 }
 
 public class UsersDto

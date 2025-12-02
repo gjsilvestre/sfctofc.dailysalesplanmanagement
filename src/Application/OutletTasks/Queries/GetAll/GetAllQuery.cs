@@ -36,8 +36,10 @@ public class GetAllOutletTasksQueryHandler :
     {
         await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
         var data = await db.OutletTasks
-            .ProjectTo<OutletTasksDto>(_mapper.ConfigurationProvider)
-            .ToListAsync(cancellationToken);
+     
+             .ProjectTo<OutletTasksDto>(_mapper.ConfigurationProvider)
+             .ToListAsync(cancellationToken);
+
         return data;
     }
 
@@ -45,8 +47,11 @@ public class GetAllOutletTasksQueryHandler :
     {
         await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
         var data = await db.OutletTasks.Where(x => x.Id == request.Id)
+                      
                        .ProjectTo<OutletTasksDto>(_mapper.ConfigurationProvider)
                        .FirstOrDefaultAsync(cancellationToken);
+
         return data;
     }
 }
+//how do i make to display the outlet name and location from this outlet tasks?
