@@ -1,0 +1,116 @@
+﻿@page "/pages/salesman-daily-plans"
+
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPMSalesmanDailyPlan.Queries
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPMSalesmanDailyPlan.Queries.GetAllQuery
+@inject ISnackbar Snackbar
+
+<MudPaper Class="pa-4" Elevation="0">
+
+    <MudStack Direction="Row" Justify="Justify.SpaceBetween" Class="mb-4">
+        <MudText Typo="Typo.h5"><b>Salesman Daily Plans</b></MudText>
+
+        <MudButton Color="Color.Primary"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="OnAddPlan">
+            Add Daily Plan
+        </MudButton>
+    </MudStack>
+
+    <MudDataGrid T="SalesmanDailyPlansDto"
+                 @ref="_dataGrid"
+                 ServerData="ServerReload"
+                 Dense="true"
+                 Hover="true"
+                 Bordered="true"
+                 Loading="_loading"
+                 RowsPerPage="10">
+
+        <Columns>
+            <PropertyColumn Property="x => x.Id" Title="ID" Width="70px" />
+            @* <PropertyColumn Property="x => x.OutletName" Title="Outlet" />
+            <PropertyColumn Property="x => x.UserName" Title="Salesman" />
+            <PropertyColumn Property="x => x.Date" Title="Date" Format="dd MMM yyyy" /> *@
+
+            <TemplateColumn Title="Actions" Width="150px">
+                <CellTemplate>
+                    <MudButton Size="Size.Small"
+                               Variant="Variant.Text"
+                               Color="Color.Info"
+                               StartIcon="@Icons.Material.Filled.Visibility"
+                               OnClick="(() => ViewPlan(context.Item))">
+                        View
+                    </MudButton>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+
+    </MudDataGrid>
+
+</MudPaper>
+
+<MudDrawer @bind-Open="_drawerViewPlan"
+           Anchor="Anchor.Right"
+           Width="500px"
+           Variant="DrawerVariant.Temporary"
+           Elevation="20">
+
+    <MudDrawerHeader>
+        <MudText Typo="Typo.h6"><b>View Daily Plan</b></MudText>
+    </MudDrawerHeader>
+
+    <MudCardContent>
+        @* <MudTextField Label="Outlet" Value="@_selectedPlan?.OutletName" ReadOnly /> *@
+        @* <MudTextField Label="Salesman" Value="@_selectedPlan?.UserName" ReadOnly />
+        <MudTextField Label="Date" Value="@_selectedPlan?.Date.ToString("dd MMM yyyy")" ReadOnly /> *@
+    </MudCardContent>
+
+</MudDrawer>
+
+@code {
+    private MudDataGrid<SalesmanDailyPlansDto> _dataGrid = default!;
+    private bool _loading;
+    private List<SalesmanDailyPlansDto> _dailyPlans = new();
+    private bool _drawerViewPlan;
+    private SalesmanDailyPlansDto? _selectedPlan;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var plans = await Mediator.Send(new GetAllSalesmanDailyPlanQuery());
+        _dailyPlans = plans.ToList();
+    }
+
+    private async Task<GridData<SalesmanDailyPlansDto>> ServerReload(GridState<SalesmanDailyPlansDto> state)
+    {
+        try
+        {
+            _loading = true;
+
+            var items = _dailyPlans;
+
+            return new GridData<SalesmanDailyPlansDto>
+            {
+                TotalItems = items.Count,
+                Items = items
+                    .Skip(state.Page * state.PageSize)
+                    .Take(state.PageSize)
+                    .ToList()
+            };
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void OnAddPlan()
+    {
+        // Open drawer for creating new plan (implement as needed)
+    }
+
+    private void ViewPlan(SalesmanDailyPlansDto plan)
+    {
+        _selectedPlan = plan;
+        _drawerViewPlan = true;
+    }
+}

@@ -16,6 +16,13 @@ public interface IApplicationDbContext: IAsyncDisposable
     DbSet<SalesOrder> SalesOrder { get; set; }
     DbSet<SalesOrderDetails> SalesOrderDetails { get; set; }
 
+     DbSet<Users> Users { get; set; }
+     DbSet<SalesmanDailyPlans> SalesmanDailyPlans { get; set; }
+     DbSet<DistributorOutlet> DistributorOutlet { get; set; }
+     DbSet<OutletSalesOrder> OutletSalesOrder { get; set; }
+    DbSet<MBLProducts> MBLProducts { get; set; }
+    DbSet<OutletTasks> OutletTasks { get; set; }
+
     #endregion
 
     #region DEFAULT ENTITIES

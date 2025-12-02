@@ -1,0 +1,467 @@
+﻿@page "/pages/outlet-tasks"
+
+@using SFCTOFC.DailySalesPlanManagement.Application.DSPMOutletTasks.Commands.AddEdit
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Commands
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPMSalesmanDailyPlan.Queries
+@inject AuthenticationStateProvider AuthStateProvider
+
+@inject ISnackbar Snackbar
+
+
+<style>
+    @@import url("https://cdn.jsdelivr.net/npm/@@fancyapps/ui@@5.0.36/dist/fancybox/fancybox.css");
+
+    .fancybox__container {
+        --fancybox-bg: rgba(24, 24, 27, 0.85);
+        z-index: 9999;
+    }
+
+    html, body {
+        -moz-osx-font-smoothing: grayscale; /* Firefox on macOS */
+        -webkit-font-smoothing: antialiased; /* Chrome, Edge, Safari */
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        font-size: 12px;
+    }
+
+    .mud-menu .mud-icon-button {
+        border-radius: 0 !important;
+    }
+
+    .search .mud-input {
+        line-height: 1px !important;
+    }
+
+    .small-input .mud-input-slot {
+        min-height: 28px !important;
+        font-size: 0.8rem !important;
+    }
+
+    .small-input input {
+        padding: 2px 6px !important;
+    }
+
+    .mud-card-content {
+        flex-grow: 1;
+        padding: 17px;
+        margin-top: -36px !important;
+    }
+
+    .mud-input-control > .mud-input-control-input-container > .mud-input-label-inputcontrol {
+        font-size: 1rem !important;
+        font-weight: 600;
+    }
+
+    .mud-table.mud-data-grid .mud-table-toolbar {
+        padding: 0rem !important;
+    }
+
+    .mud-table-root {
+        margin-top: 1.3ewm !important;
+    }
+
+    .mud-table thead th {
+        /* background-color: #c3c3c3 !important; */
+        /* background-color: #dddddd !important;  */
+        color: black !important;
+        font-weight: 600;
+        /* border: 1px solid #ccc; */
+        /* border-top: 1px solid #eaeaea; */
+    }
+
+    .force-row {
+        display: flex !important;
+        flex-direction: row !important;
+    }
+
+    .gap-20 {
+        column-gap: 190px;
+    }
+
+    .gap-21 {
+        column-gap: 207px;
+    }
+
+    .gap-22 {
+        column-gap: 140px;
+    }
+
+    .gap-19 {
+        /* column-gap: 159px; */
+    }
+
+    .mud-table-bordered th,
+    .mud-table-bordered td {
+        align-content: flex-start;
+        border: 1px solid #E3E3E3;
+        padding: 6px;
+    }
+
+    .mud-table-bordered {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .compact-padding {
+        padding: 9px 16px 0px 16px;
+    }
+
+
+    .ultra-compact-grid .mud-table-row {
+        height: 26px !important;
+    }
+
+    .ultra-compact-grid .mud-table-cell {
+        padding: 2px 6px !important;
+        font-size: 0.75rem !important;
+    }
+
+    .mud-data-grid .mud-table-foot {
+        display: none !important;
+    }
+
+    .mud-table.mud-table-striped tbody tr:nth-child(odd) {
+        background-color: #fafafa !important;
+    }
+
+    .mud-table.mud-table-striped tbody tr:nth-child(even) {
+        background-color: #ebebeb !important;
+    }
+
+    .mud-table.mud-table-hover tbody tr:hover {
+        background-color: #00baef !important;
+        color: white;
+        cursor: pointer;
+    }
+
+    .mud-datagrid-header {
+        border-bottom: 1px solid #E6E6E6;
+    }
+
+    .mud-datagrid-pager .mud-select {
+        margin-left: auto !important;
+    }
+
+    .custom-pager .mud-datagrid-pager {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+    }
+</style>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+
+
+<ErrorBoundary>
+    <MudCard>
+        <MudCardContent>
+            <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mt-7">
+                <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                    <MudIcon Icon="@Icons.Material.Filled.ShoppingCartCheckout" Color="Color.Primary" Size="Size.Large" />
+                    <MudText Typo="Typo.h3" Style="color: black;">
+                        Tasks (Special Instruction)
+                    </MudText>
+                </MudStack>
+              
+            </MudStack>
+
+        </MudCardContent>
+    </MudCard>
+
+    <MudDataGrid T="OutletTasksDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" 
+    ServerData="@(ServerReload)" 
+             
+                 FixedHeader="true" FixedFooter="false" Loading="@_loading" ColumnResizeMode="ResizeMode.Column"
+                 Striped="true" Dense="true" Hover="true" @ref="_dataGrid" RowsPerPage="20" Style="height:100%; overflow:auto;">
+        <ToolBarContent>
+            <MudStack Row Spacing="0" Class="flex-grow-1 mb-5" Justify="Justify.SpaceBetween">
+                <MudStack Row AlignItems="AlignItems.Start">
+                    <MudStack Spacing="0">
+                        <div style="width: fit-content;">
+                            <MudStack Row Spacing="1" AlignItems="AlignItems.Center">
+                                @* SEACH FIELD *@
+                                <MudTextField T="string"
+                                              Variant="Variant.Outlined"
+                                              Dense="true"
+                                              Class="search small-input mt-3 mb-4 mr-5"
+                                                 Placeholder="@ConstantString.Search"
+                                              Adornment="Adornment.End"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              IconSize="Size.Small"
+                                              Immediate="true"
+                                              Clearable="true">
+                                </MudTextField>
+                                <MudTooltip Text="Refresh Dashboard">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Refresh"
+                                                   Color="Color.Primary"
+                                                   Size="Size.Small" />
+                                </MudTooltip>
+                                <MudButton Disabled="@_loading"
+                                           class="mr-6"
+                                           Size="Size.Small"
+                                           OnClick="OnAddTask">
+                                    <MudIcon Icon="@Icons.Material.Filled.PlaylistAdd" Size="Size.Small" Style="margin: 3px" Color="Color.Info" />
+                                    Add Task
+                                </MudButton>
+                            </MudStack>
+                        </div>
+                    </MudStack>
+                </MudStack>
+            </MudStack>
+        </ToolBarContent>
+
+
+
+        <Columns>
+            <PropertyColumn Property="x => x.TaskName" Title="Task" />
+            <PropertyColumn Property="x => x.OutletName" Title="Outlet" />
+            @* <PropertyColumn Property="x => x.OutletAddress" Title="Address" /> *@
+            <PropertyColumn Property="x => x.OutletProvince" Title="Province" />
+            <PropertyColumn Property="x => x.OutletRegion" Title="Region" />
+
+
+            <PropertyColumn Property="x => x.AssignedTo!.UserName" Title="Salesman" />
+            <PropertyColumn Property="x => x.CreatedBy!.UserName" Title="Assigned By" />
+            <PropertyColumn Property="x => x.IsCompleted" Title="Done?" />
+            <PropertyColumn Property="x => x.CreatedAt" Title="Created"
+                            Format="dd MMM yyyy hh:mm tt" />
+
+         </Columns>
+
+        <NoRecordsContent>
+            <MudText>@ConstantString.NoRecords</MudText>
+        </NoRecordsContent>
+        <LoadingContent>
+            <MudText>@ConstantString.Loading</MudText>
+        </LoadingContent>
+        <PagerContent>
+            <MudDataGridPager PageSizeOptions="@(new[] { 10, 15, 30, 50, 100, 500, 1000 })" />
+        </PagerContent>
+    </MudDataGrid>
+</ErrorBoundary>
+
+<MudDrawer @bind-Open="_drawerAddTask"
+           Anchor="Anchor.Right"
+           Width="500px"
+           Variant="DrawerVariant.Temporary"
+           Elevation="20">
+
+    <MudDrawerHeader>
+        <div style="display:flex; justify-content:space-between; align-items:start; width:100%;">
+
+            <!-- LEFT SIDE -->
+            <div>
+                <div style="font-size:1.50rem; font-weight:bold;">
+                    <MudText Typo="Typo.h3" Color="Color.Info">
+                       AssignTask
+                    </MudText>
+
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div style="display:flex; gap:6px; align-items:start;">
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Default" OnClick="@(() => _drawerAddTask = false)" />
+            </div>
+
+        </div>
+    </MudDrawerHeader>
+
+    <MudCardContent>
+        <MudStack Class="force-row mt-1" Justify="Justify.FlexEnd" AlignItems="AlignItems.Start" Spacing="2">
+            <MudButton Class="mt-4"
+                       Color="Color.Primary"
+                       OnClick="SaveTask">
+                       <MudIcon Icon="@Icons.Material.Filled.PlaylistAdd" Color="Color.Info" Style="margin: 5px"/>
+                Submit
+            </MudButton>
+        
+        </MudStack>
+        <MudTextField @bind-Value="_model.TaskName"
+                      Label="Task Name"
+                      Lines="3"
+                      MaxLength="100"
+                      Margin="Margin.Dense"
+                      Variant="Variant.Outlined"
+                      Required />
+
+
+
+        <MudSelect T="int" Value="_model.SalesmanDailyPlanId" 
+        ValueChanged="OnDailyPlanChanged" Label="Select Outlet (from Daily Plan)">
+        @foreach (var plan in _dailyPlans) {
+            <MudSelectItem 
+                Value="@plan.Id"> @plan.OutletName (@plan.UserName) - @plan.PlanDate?.ToString("dd MMM yyyy") 
+            </MudSelectItem>
+        }
+
+
+         </MudSelect>
+
+
+     
+    </MudCardContent>
+
+</MudDrawer>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
+    [CascadingParameter] private UserProfile? UserProfile { get; set; }
+    private MudDataGrid<OutletTasksDto> _dataGrid = default!;
+    private bool _loading;
+    private List<OutletTasksDto> _list = new();
+    private int _currentUserId;
+    private int _supervisorId = 1; // hardcode for now or load from UserProfile if available
+
+
+    private List<SalesmanDailyPlansDto> _dailyPlans = new();
+    private List<UsersDto> _salesmen = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _dailyPlans = (await Mediator.Send(new GetDailyPlansQuery())).ToList();
+
+
+    }
+    private SalesmanDailyPlansDto? _selectedPlan;
+
+
+    private void OnDailyPlanChanged(int dailyPlanId) { 
+        _model.SalesmanDailyPlanId = dailyPlanId; 
+        var selectedPlan = _dailyPlans.FirstOrDefault(p => p.Id == dailyPlanId); 
+        if (selectedPlan != null) _model.AssignedToUserId = selectedPlan.UserId; 
+    }
+
+
+    private IEnumerable<SalesmanDailyPlansDto> SearchDailyPlans(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return _dailyPlans;
+
+        return _dailyPlans.Where(x =>
+            (x.OutletName != null && x.OutletName.Contains(value, StringComparison.OrdinalIgnoreCase)) ||
+            (x.UserName != null && x.UserName.Contains(value, StringComparison.OrdinalIgnoreCase)) ||
+            (x.PlanDate.HasValue && x.PlanDate.Value.ToString("dd/MM/yyyy").Contains(value))
+        );
+    }
+
+
+    
+    public class GetAllUsersQuery : IRequest<IEnumerable<UsersDto>> { }
+
+    public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IEnumerable<UsersDto>>
+    {
+        private readonly IApplicationDbContextFactory _dbContextFactory;
+        private readonly IMapper _mapper;
+
+        public GetAllUsersQueryHandler(IApplicationDbContextFactory dbContextFactory, IMapper mapper)
+        {
+            _dbContextFactory = dbContextFactory;
+            _mapper = mapper;
+        }
+
+        public async Task<IEnumerable<UsersDto>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
+        {
+            await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+            return await db.Users
+                .ProjectTo<UsersDto>(_mapper.ConfigurationProvider)
+                .ToListAsync(cancellationToken);
+        }
+    }
+
+    private async Task<GridData<OutletTasksDto>> ServerReload(GridState<OutletTasksDto> state)
+    {
+        try
+        {
+            _loading = true;
+
+            var result = await Mediator.Send(new GetAllOutletTasksQuery());
+
+            var items = result.ToList();
+
+            return new GridData<OutletTasksDto>
+            {
+                TotalItems = items.Count,
+                Items = items
+                    .Skip(state.Page * state.PageSize)
+                    .Take(state.PageSize)
+                    .ToList()
+            };
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+
+    private void OpenAddTaskDrawer(SalesmanDailyPlans plan)
+    {
+        _model = new CreateOutletTaskCommand();
+
+        _model.SalesmanDailyPlanId = plan.Id;
+        _model.AssignedToUserId = plan.UserId;
+        _model.CreatedByUserId = _supervisorId;
+
+        // Pre-filter daily plans if needed
+        _dailyPlans = _dailyPlans.Where(p => p.UserId == plan.UserId).ToList();
+
+        _drawerAddTask = true;
+    }
+
+
+
+    private void OnAddTask()
+    {
+        // open drawer
+        _drawerAddTask = true;
+    }
+
+    private void ViewTask(OutletTasksDto task)
+    {
+        _selectedTask = task;
+        _drawerViewTask = true;
+    }
+
+    private bool _drawerAddTask;
+    private bool _drawerViewTask;
+
+    private OutletTasksDto _selectedTask = new();
+
+    private CreateOutletTaskCommand _model = new();
+
+    private async Task SaveTask()
+    {
+        if (_model.SalesmanDailyPlanId == 0)
+        {
+
+            Snackbar.Add("Please select an outlet first", Severity.Warning);
+            return;
+        }
+
+        // Always assign supervisor as creator (ID = 2)
+        _model.CreatedByUserId = 2;
+
+        // Optionally, also ensure AssignedToUserId is set from selected plan
+        if (_model.AssignedToUserId == 0 && _dailyPlans.Any())
+        {
+            var selectedPlan = _dailyPlans.FirstOrDefault(p => p.Id == _model.SalesmanDailyPlanId);
+            if (selectedPlan != null)
+                _model.AssignedToUserId = selectedPlan.UserId;
+        }
+
+        await Mediator.Send(_model);
+
+        Snackbar.Add("Task added successfully", Severity.Success);
+        _drawerAddTask = false;
+    }
+
+
+
+}

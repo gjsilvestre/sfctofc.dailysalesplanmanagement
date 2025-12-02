@@ -40,3 +40,22 @@ public class PurchaseOrderDetailsConfiguration : IEntityTypeConfiguration<Purcha
         builder.Navigation(e => e.LastModifiedByUser).AutoInclude();
     }
 }
+
+//public class SalesmanDailyPlanConfiguration : IEntityTypeConfiguration<MBLSalesmanDailyPlans>
+//{
+//    public void Configure(EntityTypeBuilder<MBLSalesmanDailyPlans> builder)
+//    {
+//        builder.Ignore(e => e.DomainEvents);
+//        //builder.Ignore(e => e.DomainEvents);
+//        //builder.HasOne(x => x.CreatedByUser)
+//        //   .WithMany()
+//        //   .HasForeignKey(x => x.CreatedBy)
+//        //   .OnDelete(DeleteBehavior.Restrict);
+//        //builder.HasOne(x => x.LastModifiedByUser)
+//        //    .WithMany()
+//        //    .HasForeignKey(x => x.LastModifiedBy)
+//        //    .OnDelete(DeleteBehavior.Restrict);
+//        //builder.Navigation(e => e.CreatedByUser).AutoInclude();
+//        //builder.Navigation(e => e.LastModifiedByUser).AutoInclude();
+//    }
+//}
