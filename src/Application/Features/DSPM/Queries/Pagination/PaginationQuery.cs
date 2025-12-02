@@ -9,7 +9,7 @@ namespace SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.Pag
 
 #region SalesmanTracker
 
-public class PaginationQuerySalesmanTracker : AdvancedFilterSalesmanTracker, IRequest<PaginatedData<SalesmanTrackerDto>>
+public class PaginationQuerySalesmanTracker : AdvancedFilterSalesmanTracker, IRequest<PaginatedData<SalesmanDailyPlansDto>>
 {
     public AdvancedSpecificationSalesmanTracker Specification => new(this);
     public string CacheKey => SalesmanTracketCacheKey.GetPaginationCacheKey($"{this}");
@@ -19,11 +19,12 @@ public class PaginationQuerySalesmanTracker : AdvancedFilterSalesmanTracker, IRe
     public override string ToString()
     {
         return
-            $"CurrentUser:{CurrentUser?.UserId},ListView:{ListView},Search:{Keyword},Name:{Name},Date:{Date},SortDirection:{SortDirection},OrderBy:{OrderBy},{PageNumber},{PageSize}";
+            $"CurrentUser:{CurrentUser?.UserId},ListView:{ListView}," +
+            $"Search:{Keyword},Name:{Name},Date:{Date},SortDirection:{SortDirection}," +
+            $"OrderBy:{OrderBy},{PageNumber},{PageSize}";
     }
 }
-
-public class PaginationQuerySalesmanTrackerHandler : IRequestHandler<PaginationQuerySalesmanTracker, PaginatedData<SalesmanTrackerDto>>
+public class PaginationQuerySalesmanTrackerHandler : IRequestHandler<PaginationQuerySalesmanTracker, PaginatedData<SalesmanDailyPlansDto>>
 {
     private readonly IApplicationDbContextFactory _dbContextFactory;
     private readonly IMapper _mapper;
@@ -33,36 +34,73 @@ public class PaginationQuerySalesmanTrackerHandler : IRequestHandler<PaginationQ
         _mapper = mapper;
     }
 
-    public async Task<PaginatedData<SalesmanTrackerDto>> Handle(PaginationQuerySalesmanTracker request, CancellationToken cancellationToken)
+
+    public async Task<PaginatedData<SalesmanDailyPlansDto>> Handle(
+     PaginationQuerySalesmanTracker request,
+     CancellationToken cancellationToken)
     {
         await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
-        var query = from slm in db.SalesmanTracker.AsQueryable()
-                    select new SalesmanTrackerDto
-                    {
-                        Id = slm.Id,
-                        AspNetUserId = slm.AspNetUserId,
-                        Name = slm.Name,
-                        Date = slm.Date,
-                        ActualSales = slm.ActualSales,
-                        TargetSales = slm.TargetSales,
-                        ActualStoreVisited = slm.ActualStoreVisited,
-                        TargetStoreVisited = slm.TargetStoreVisited,
-                        Skipped = 0
-                    };
 
-        // Apply sorting
-        query = query.OrderBy($"{request.OrderBy} {request.SortDirection}");
-        // Count total before applying pagination
-        var totalCount = await query.CountAsync(cancellationToken);
-        // Apply pagination
-        var items = await query
+        var query = db.SalesmanDailyPlans
+                      .Include(x => x.User) // include navigation property now
+                      .AsQueryable();
+
+   
+        if (request.Date.HasValue)
+        {
+            var selectedDate = request.Date.Value.Date;
+            query = query.Where(x => x.PlanDate.HasValue && x.PlanDate.Value.Date == selectedDate);
+        }
+
+   
+        if (request.CurrentUser != null && int.TryParse(request.CurrentUser.UserId, out var userId))
+        {
+            query = query.Where(x => x.UserId == userId);
+        }
+
+        var list = await query.ToListAsync(cancellationToken); 
+
+        var groupedQuery = list
+            .GroupBy(x => new
+            {
+                x.UserId,
+                x.User.FirstName,
+                PlanDate = x.PlanDate?.Date
+            })
+            .Select(g => new SalesmanDailyPlansDto
+            {
+                UserId = g.Key.UserId,
+                UserName = g.Key.FirstName,
+                PlanDate = g.Key.PlanDate,
+
+                OutletCount = g.Count(), 
+                TargetSales = g.Sum(x => x.TargetSales),
+                ActualSales = g.Sum(x => x.ActualSales),
+                ScheduledCount = g.Count(),
+                CheckedInCount = g.Count(x => x.CheckedIn.HasValue),
+                SkippedCount = g.Count(x => x.Skipped.HasValue)
+            })
+            .AsQueryable(); 
+
+      
+        groupedQuery = groupedQuery.OrderBy($"{request.OrderBy} {request.SortDirection}");
+
+      
+        var totalCount = groupedQuery.Count();
+
+        
+        var items = groupedQuery
             .Skip((request.PageNumber - 1) * request.PageSize)
             .Take(request.PageSize)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
-        return new PaginatedData<SalesmanTrackerDto>(items, totalCount, request.PageNumber, request.PageSize);
+        return new PaginatedData<SalesmanDailyPlansDto>(
+            items, totalCount, request.PageNumber, request.PageSize
+        );
     }
+
 }
+
 
 #endregion
 

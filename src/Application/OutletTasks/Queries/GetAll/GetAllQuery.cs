@@ -54,4 +54,3 @@ public class GetAllOutletTasksQueryHandler :
         return data;
     }
 }
-//how do i make to display the outlet name and location from this outlet tasks?

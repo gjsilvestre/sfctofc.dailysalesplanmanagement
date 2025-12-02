@@ -81,8 +81,8 @@ public class MenuService : IMenuService
                         {
                             Title = "Task (Special Instruction)",
                             //Icon = Icons.Material.Filled.ArrowRight,
-                            Href = "/",
-                            PageStatus = PageStatus.ComingSoon
+                            Href = "/pages/outlet-tasks",
+                            PageStatus = PageStatus.Completed
                         },
                     }
                 },

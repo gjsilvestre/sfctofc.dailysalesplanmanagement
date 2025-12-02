@@ -18,6 +18,11 @@ public class SalesmanDailyPlansDto
     public string OutletName { get; set; } // DistributorOutlet name
     public DateTime? PlanDate { get; set; }
 
+    public int OutletCount { get; set; }
+    public int ScheduledCount { get; set; }
+    public int CheckedInCount { get; set; }
+    public int SkippedCount { get; set; }
+
 
     public decimal? TargetSales { get; set; }
     public int? TargetQty { get; set; }
@@ -99,6 +104,7 @@ public class OutletTasksDto
     public string? OutletCity { get; set; }
     public string? OutletProvince { get; set; }
     public string? OutletRegion { get; set; }
+    public string? DailyPlanDate { get; set; }
 
 
     private class Mapping : Profile
@@ -113,7 +119,9 @@ public class OutletTasksDto
                 .ForMember(d => d.OutletProvince,
                     opt => opt.MapFrom(s => s.DailyPlan.Outlet.Province))
                 .ForMember(d => d.OutletRegion,
-                    opt => opt.MapFrom(s => s.DailyPlan.Outlet.Region));
+                    opt => opt.MapFrom(s => s.DailyPlan.Outlet.Region))
+                .ForMember(d => d.DailyPlanDate,
+                    opt => opt.MapFrom(s => s.DailyPlan.PlanDate));
 
             CreateMap<OutletTasksDto, OutletTasks>(MemberList.None);
         }
