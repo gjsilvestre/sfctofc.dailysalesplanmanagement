@@ -7,7 +7,7 @@ using SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.DTOs;
 
 namespace SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.Queries.ByName;
 
-public class PicklistSetsQueryByName : ICacheableRequest<IEnumerable<PicklistSetDto>>
+public class PicklistSetsQueryByName : IRequest<IEnumerable<PicklistSetDto>>
 {
     public PicklistSetsQueryByName(Picklist name)
     {

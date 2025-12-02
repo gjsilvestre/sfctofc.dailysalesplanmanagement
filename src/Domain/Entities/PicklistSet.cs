@@ -50,5 +50,8 @@ public enum Picklist
     [Description("JOB REQ PRIORITY")] JRQPriority,
     [Description("PRODUCTION TICKET MACHINE")] ProductionTicketMachine,
     [Description("PRODUCTION TICKET CHOCOLATE MACHINE")] ProductionTicketChocolateMachine,
-    [Description("REPORT TYPE")] ReportType
+    [Description("REPORT TYPE")] ReportType,
+    [Description("Channel")] Channel,
+    [Description("Province")] Province,
+    [Description("Region")] Region,
 }

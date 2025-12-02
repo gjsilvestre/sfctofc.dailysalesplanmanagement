@@ -1,57 +1,70 @@
-﻿using SFCTOFC.DailySalesPlanManagement.Application.Common.Interfaces.Identity;
-using SFCTOFC.DailySalesPlanManagement.Application.Features.Identity.DTOs;
+﻿
+using SFCTOFC.DailySalesPlanManagement.Application.Features.PicklistSets.DTOs;
 
-namespace SFCTOFC.DailySalesPlanManagement.Server.UI.Components.Autocompletes;
+namespace SFCTOFC.CorporateSolutions.Server.UI.Components.Autocompletes;
 
-public class PickUserAutocomplete<T> : MudAutocomplete<ApplicationUserDto>
+public class PicklistAutocomplete<T> : MudAutocomplete<string>
 {
-    public PickUserAutocomplete()
+    public PicklistAutocomplete()
     {
-        SearchFunc = SearchKeyValues;
-        ToStringFunc = dto => dto?.UserName;
+        SearchFunc = SearchFunc_;
         Clearable = true;
         Dense = true;
         ResetValueOnEmptyText = true;
-        ShowProgressIndicator = true;
-        MaxItems = 50;
+        MaxItems = int.MaxValue;
+        ToStringFunc = x =>
+        {
+            if (x != null && PicklistService != null)
+                return PicklistService.DataSource.FirstOrDefault(y => y.Value != null &&
+                                                                      y.Value.Equals(x))?.Text ?? x;
+            return x;
+        };
     }
 
-    [Parameter] public string? TenantId { get; set; }
+    [Parameter] public Picklist Picklist { get; set; }
 
-    [Inject] private IUserService UserService { get; set; } = default!;
+    [Inject] private IPicklistService PicklistService { get; set; } = default!;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        UserService.OnChange += TenantsService_OnChange;
+        PicklistService.OnChange += PicklistService_OnChange;
+        await base.OnInitializedAsync();
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await UserService.InitializeAsync();
+            await PicklistService.InitializeAsync();
         }
-
     }
-    private async Task TenantsService_OnChange()
+
+
+    private async Task PicklistService_OnChange()
     {
         await InvokeAsync(StateHasChanged);
     }
 
     protected override async ValueTask DisposeAsyncCore()
     {
-        UserService.OnChange -= TenantsService_OnChange;
+        PicklistService.OnChange -= PicklistService_OnChange;
         await base.DisposeAsyncCore();
     }
 
-    private Task<IEnumerable<ApplicationUserDto>> SearchKeyValues(string? value, CancellationToken cancellation)
+    private Task<IEnumerable<string>> SearchFunc_(string? value, CancellationToken cancellation = default)
     {
-        var result = UserService.DataSource.Where(x => x.TenantId != null && x.TenantId.Equals(TenantId));
+        // if text is null or empty, show complete list
+        return string.IsNullOrEmpty(value)
+            ? Task.FromResult(PicklistService.DataSource
+                .Where(x => x.Name == Picklist)
+                .Select(x => x.Value ?? string.Empty))
+            : Task.FromResult(PicklistService.DataSource
+                .Where(x => x.Name == Picklist && Contains(x, value))
+                .Select(x => x.Value ?? string.Empty));
+    }
 
-        if (!string.IsNullOrEmpty(value))
-            result = UserService.DataSource.Where(x => x.TenantId != null && x.TenantId.Equals(TenantId) &&
-                                                       (x.UserName.Contains(value,
-                                                            StringComparison.OrdinalIgnoreCase) ||
-                                                        x.Email.Contains(value, StringComparison.OrdinalIgnoreCase)));
-        return Task.FromResult(result);
+    private static bool Contains(PicklistSetDto model, string value)
+    {
+        return (model.Value != null && model.Value.Contains(value, StringComparison.InvariantCultureIgnoreCase))
+               || (model.Text != null && model.Text.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
 }

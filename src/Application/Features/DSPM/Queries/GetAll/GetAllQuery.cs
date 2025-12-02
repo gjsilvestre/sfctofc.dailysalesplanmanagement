@@ -57,6 +57,55 @@ public class GetAllOutletsQueryHandler :
 #endregion
 
 #region PURCHASE ORDER
+public class GetAllPurchaseOrderByIdQuery : IRequest<IEnumerable<PurchaseOrderDto>>
+{
+    public int OutletId { get; set; }   
+    public string CacheKey => PurchaseOrderCacheKey.GetAllCacheKey;
+  
+    
+    public IEnumerable<string>? Tags => PurchaseOrderCacheKey.Tags;
+}
+ 
+public class GetAllPurchaseOrderByIdQueryHandler :
+    IRequestHandler<GetAllPurchaseOrderByIdQuery, IEnumerable<PurchaseOrderDto>>
+{
+    private readonly IMapper _mapper;
+    private readonly IApplicationDbContextFactory _dbContextFactory;
+
+    public GetAllPurchaseOrderByIdQueryHandler(
+        IMapper mapper,
+        IApplicationDbContextFactory dbContextFactory
+    )
+    {
+        _mapper = mapper;
+        _dbContextFactory = dbContextFactory;
+    }
+
+    public async Task<IEnumerable<PurchaseOrderDto>> Handle(GetAllPurchaseOrderByIdQuery request, CancellationToken cancellationToken)
+    {
+        await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
+        var data = from po in db.PurchaseOrder.Where(x => x.OutletId == request.OutletId)
+                   join ot in db.Outlets on po.OutletId equals ot.Id
+                   join pd in db.PurchaseOrderDetails on po.Id equals pd.PurchaseOrderId into podGroup
+                   select new PurchaseOrderDto
+                   {
+                       Id = po.Id,
+                       PurchaseOrderNo = po.PurchaseOrderNo,
+                       PurchaseOrderDate = po.PurchaseOrderDate,
+                       OutletId = po.OutletId,
+                       CancelDate = po.CancelDate,
+                       DeliveryDate = po.DeliveryDate,
+                       Status = po.Status,
+                       TotalAmount = podGroup.Sum(x =>x.Amount)
+                   };
+
+        return await data.OrderByDescending(x => x.PurchaseOrderDate).ToListAsync(cancellationToken);
+    }
+
+}
+
+
+#region PURCHASE ORDER DETAILS  
 public class GetAllPurchaseOrderDetailsQuery : IRequest<IEnumerable<PurchaseOrderDetailsDto>>
 {
     public int PurchaseOrderId { get; set; }
@@ -104,5 +153,7 @@ public class GetAllPurchaseOrderDetailsQueryHandler :
         return data;
     }
 }
+
+#endregion
 
 #endregion

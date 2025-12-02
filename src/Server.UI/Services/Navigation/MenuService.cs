@@ -96,8 +96,8 @@ public class MenuService : IMenuService
                         {
                             Title = "Outlets",
                             //Icon = Icons.Material.Filled.ArrowRight,
-                            Href = "/",
-                            PageStatus = PageStatus.ComingSoon
+                            Href = "/pages/outlet",
+                            PageStatus = PageStatus.Completed
                         },
                         new()
                         {

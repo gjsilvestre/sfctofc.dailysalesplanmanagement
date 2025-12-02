@@ -80,16 +80,19 @@ public class PurchaseOrderDto
     public string? Salesman { get; set; }
     public string? Status { get; set; }
     public string? RefPONo { get; set; }
-    
+    public decimal? TotalAmount { get; set; }
+
     public List<PurchaseOrderDetailsDto>? Details { get; set; }
     private class Mapping : Profile
     {
         public Mapping()
         {
-            CreateMap<PurchaseOrder, PurchaseOrderDto>().ReverseMap();
-            CreateMap<PurchaseOrderDto, PurchaseOrder>(MemberList.None);
-            CreateMap<PurchaseOrderDetails, PurchaseOrderDetailsDto>().ReverseMap();
-            CreateMap<PurchaseOrderDetailsDto, PurchaseOrderDetails>(MemberList.None);
+            CreateMap<PurchaseOrder, PurchaseOrderDto>();
+
+            CreateMap<PurchaseOrderDto, PurchaseOrder>()
+                .ForMember(dest => dest.CreatedByUser, opt => opt.Ignore())
+                .ForMember(dest => dest.LastModifiedByUser, opt => opt.Ignore())
+                .ForMember(dest => dest.Details, opt => opt.Ignore());
         }
     }
 }

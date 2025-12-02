@@ -169,9 +169,9 @@
         <MudCardContent>
             <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="mt-7">
                 <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
-                    <MudIcon Icon="@Icons.Material.Filled.ShoppingCartCheckout" Color="Color.Primary" Size="Size.Large" />
+                    <MudIcon Icon="@Icons.Material.Filled.Store" Color="Color.Primary" Size="Size.Large" />
                     <MudText Typo="Typo.h3" Style="color: black;">
-                        Purchase Order
+                        Outlets
                     </MudText>
                 </MudStack>
                 <MudStack Spacing="0" AlignItems="AlignItems.End">
@@ -187,7 +187,7 @@
         </MudCardContent>
     </MudCard>
 
-    <MudDataGrid T="OutletDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)"
+    <MudDataGrid T="OutletDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)" RowClick="OnRowClickOutlet"
                  FixedHeader="true" FixedFooter="false" Loading="@_loading" ColumnResizeMode="ResizeMode.Column"
                  Striped="true" Dense="true" Hover="true" @ref="_dataGridOutlet" RowsPerPage="20" Style="height:100%; overflow:auto;">
         <ToolBarContent>
@@ -220,7 +220,7 @@
                                            class="mr-6"
                                            Size="Size.Small">
                                     <MudIcon Icon="@Icons.Material.Filled.PlaylistAdd" Size="Size.Small" Style="margin: 3px" Color="Color.Info" />
-                                    Add Customer PO
+                                    Add Outlet
                                 </MudButton>
                             </MudStack>
                         </div>
@@ -237,7 +237,13 @@
                     </div>
                 </CellTemplate>
             </TemplateColumn>
-           
+            <PropertyColumn Property="x => x.Name" Title="Name" />
+            <PropertyColumn Property="x => x.Address" Title="Address" />
+            <PropertyColumn Property="x => x.City" Title="Town/City" />
+            <PropertyColumn Property="x => x.Province" Title="Province" />
+            <PropertyColumn Property="x => x.Region" Title="Region" />
+            <PropertyColumn Property="x => x.Channel" Title="Channel" />
+            <PropertyColumn Property="x => x.Salesman" Title="Salesman" />
         </Columns>
 
         <NoRecordsContent>
@@ -252,6 +258,194 @@
     </MudDataGrid>
 </ErrorBoundary>
 
+<MudDrawer @bind-Open="_drawerCustomer"
+           Responsive="true"
+           Anchor="Anchor.Right"
+           Elevation="20"
+           Variant="DrawerVariant.Temporary"
+           Width="75%"
+           DisableOverlay="false"
+           Class="pa-1">
+
+    <MudDrawerHeader>
+        <div style="display:flex; justify-content:space-between; align-items:start; width:100%;">
+            <!-- LEFT SIDE -->
+            <div>
+                <div style="font-size:1.50rem; font-weight:bold;">
+                    <MudStack Row AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.Description" Color="Color.Primary" Size="Size.Large" />
+                        <MudText Typo="Typo.h3" Color="Color.Primary">
+                            Outlet Information
+                        </MudText>
+                    </MudStack>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div style="display:flex; gap:6px; align-items:start;">
+                <MudIconButton Icon="@Icons.Material.Filled.ChevronLeft" Size="Size.Small" Color="Color.Primary" OnClick="Previous" />
+                <MudIconButton Icon="@Icons.Material.Filled.ChevronRight" Size="Size.Small" Color="Color.Primary" OnClick="Next" />
+                <MudIconButton Icon="@Icons.Material.Filled.Close" Size="Size.Small" Color="Color.Default" OnClick="@(() => _drawerCustomer = false)" />
+            </div>
+        </div>
+    </MudDrawerHeader>
+
+    <MudCardContent>
+        <MudStack Direction="Row" Class="force-row mb-7" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Start" Spacing="2">
+            <MudStack Direction="Column" Column Spacing="0" Class="mb-5">
+                <MudStack Class="force-row mt-3" Justify="Justify.FlexStart" AlignItems="AlignItems.Start" Spacing="2">
+                    <MudSpacer />
+                </MudStack>
+            </MudStack>
+            <MudStack Class="force-row mt-1" Justify="Justify.FlexEnd" AlignItems="AlignItems.Start" Spacing="2">
+                <MudButton Disabled="@_loading">
+                    <MudIcon Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Info" Style="margin: 5px" />
+                    Update
+                </MudButton>
+                <MudButton Disabled="@_loading">
+                    <MudIcon Icon="@Icons.Material.Filled.Input" Size="Size.Small" Color="Color.Info" Style="margin: 5px" />
+                    Close
+                </MudButton>
+            </MudStack>
+        </MudStack>
+        
+        <MudForm Model="_model" @ref="@_form" Validation="@(Validator.ValidateValue(_model))">
+            <MudGrid Spacing="2">
+                <MudItem xs="3">
+                    <MudTextField Label="Name"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.Name)"
+                                  @bind-Value="_model.Name"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="9">
+                    <MudTextField Label="Address"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.Address)"
+                                  @bind-Value="_model.Address"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudTextField Label="City"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.City)"
+                                  @bind-Value="_model.City"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+                <MudItem xs="3">
+                    <PicklistAutocomplete Picklist="Picklist.Province" T="string"
+                                          Label="@L["Province"]"
+                                          For="@(() => _model.Province)"
+                                          ResetValueOnEmptyText="true"
+                                          ShowProgressIndicator="true"
+                                          @bind-Value="_model.Province"
+                                          Style="width:100%; height:100%;"
+                                          Margin="Margin.Dense" 
+                                          Variant="Variant.Outlined">
+                        <ProgressIndicatorTemplate>
+                            <MudProgressLinear Size="MudBlazor.Size.Small" Indeterminate="true" />
+                        </ProgressIndicatorTemplate>
+                    </PicklistAutocomplete>
+                </MudItem>
+                <MudItem xs="3">
+                    <PicklistAutocomplete Picklist="Picklist.Region" T="string"
+                                          Label="@L["Region"]"
+                                          For="@(() => _model.Region)"
+                                          ResetValueOnEmptyText="true"
+                                          ShowProgressIndicator="true"
+                                          @bind-Value="_model.Region"
+                                          Style="width:100%;"
+                                          Margin="Margin.Dense" Variant="Variant.Outlined">
+                        <ProgressIndicatorTemplate>
+                            <MudProgressLinear Size="MudBlazor.Size.Small" Indeterminate="true" />
+                        </ProgressIndicatorTemplate>
+                    </PicklistAutocomplete>
+                </MudItem>
+                <MudItem xs="3">
+                    <PicklistAutocomplete Picklist="Picklist.Channel" T="string"
+                                          Label="@L["Channel"]"
+                                          For="@(() => _model.Channel)"
+                                          ResetValueOnEmptyText="true"
+                                          ShowProgressIndicator="true"
+                                          @bind-Value="_model.Channel" 
+                                          Style="width:100%;"
+                                          Margin="Margin.Dense" Variant="Variant.Outlined">
+                        <ProgressIndicatorTemplate>
+                            <MudProgressLinear Size="MudBlazor.Size.Small" Indeterminate="true" />
+                        </ProgressIndicatorTemplate>
+                    </PicklistAutocomplete>
+                </MudItem>
+                <MudItem xs="3">
+                    <MudTextField Label="Salesman"
+                                  Lines="1"
+                                  Margin="Margin.Dense"
+                                  For="@(() => _model.Salesman)"
+                                  @bind-Value="_model.Salesman"
+                                  Variant="Variant.Outlined">
+                    </MudTextField>
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+
+        <MudItem xs="12" sm="12" Class="mt-5">
+            <MudTabs>
+                <MudTabPanel Text="Recent Purchase Order" Icon="@Icons.Material.Filled.ShoppingCartCheckout" Size="">
+                    <MudDataGrid T="PurchaseOrderDto"
+                                 Items="@_purchaseOrder"
+                                 @ref="_dataGridPurchaseOrder"
+                                 Class="mb-10" Dense="true" Filterable="false"
+                                 Hover="true" Bordered="true" EditMode="DataGridEditMode.Cell"
+                                 Groupable="true" GroupExpanded="true" HorizontalScrollbar="false"
+                                 EditTrigger="DataGridEditTrigger.OnRowClick" Editable="true"
+                                 ReadOnly="false" Style="border-radius:6px;" Striped="true">
+                        <Columns>
+                            <PropertyColumn Property="x => x.PurchaseOrderNo" Title="Purchase Order No" Sortable="false" FlexWidth="false" Width="200px" ColumnStyle="min-width:200px; max-width:200px; width:200px;" HeaderStyle="min-width:200px; max-width:200px; width:200px;" />
+                            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.PurchaseOrderDate" Title="Purchase Order Date">
+                                <CellTemplate>
+                                    @(context.Item.PurchaseOrderDate?.ToString("MMM dd, yyyy") ?? "")
+                                </CellTemplate>
+                            </PropertyColumn>
+                            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.DeliveryDate" Title="Delivery Date">
+                                <CellTemplate>
+                                    @(context.Item.DeliveryDate?.ToString("MMM dd, yyyy") ?? "")
+                                </CellTemplate>
+                            </PropertyColumn>
+                            @* <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.CancelDate" Title="Cancel Date">
+                                <CellTemplate>
+                                    @(context.Item.CancelDate?.ToString("MMM dd, yyyy") ?? "")
+                                </CellTemplate>
+                            </PropertyColumn> *@
+                            <PropertyColumn Property="x => x.CancelDate" Title="Cancel Date" Sortable="false" FlexWidth="false" Width="150px" ColumnStyle="min-width:150px; max-width:150px; width:150px;" HeaderStyle="min-width:150px; max-width:150px; width:150px;" />
+                            <PropertyColumn Property="x => x.Status" Title="Status" Sortable="false" FlexWidth="false" Width="150px" ColumnStyle="min-width:150px; max-width:150px; width:150px;" HeaderStyle="min-width:150px; max-width:150px; width:150px;" />
+                            <PropertyColumn Property="x => x.TotalAmount" Title="Total Amount" Sortable="false" FlexWidth="false" Width="150px" ColumnStyle="min-width:150px; max-width:150px; width:150px;" HeaderStyle="min-width:150px; max-width:150px; width:150px;">
+                                <CellTemplate>
+                                    @(context.Item.TotalAmount?.ToString("C2") ?? "")
+                                </CellTemplate>
+                            </PropertyColumn>
+                        </Columns>
+                    </MudDataGrid>
+                </MudTabPanel>
+                <MudTabPanel Text="Products" Icon="@Icons.Material.Filled.Cookie" Size="">
+                    <MudDataGrid T="PurchaseOrderDto"
+                                 Items="@_purchaseOrder"
+                                 Class="mb-10" Dense="true" Filterable="false"
+                                 Hover="true" Bordered="true" EditMode="DataGridEditMode.Cell"
+                                 Groupable="true" GroupExpanded="true" HorizontalScrollbar="false"
+                                 EditTrigger="DataGridEditTrigger.OnRowClick" Editable="true"
+                                 ReadOnly="false" Style="border-radius:6px;" Striped="true">
+                    </MudDataGrid>
+                </MudTabPanel>
+            </MudTabs>
+        </MudItem>
+    </MudCardContent>
+</MudDrawer>
+
 @code {
     public string Title { get; set; } = "Outlet";
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
@@ -260,6 +454,8 @@
     private PaginationQueryOutlets _paginationQuery { get; } = new();
     private bool _loading;
 
+    private bool _drawerCustomer;
+
     private int _currentIndex = 0;
     private OutletDto _currentDto = new();
     private List<OutletDto> _List = new();
@@ -267,6 +463,9 @@
 
     private MudForm? _form;
     private AddEditOutletCommand _model = new();
+
+    private MudDataGrid<PurchaseOrderDto> _dataGridPurchaseOrder = default!;
+    private IEnumerable<PurchaseOrderDto> _purchaseOrder = new List<PurchaseOrderDto>();
 
     private async Task<GridData<OutletDto>> ServerReload(GridState<OutletDto> state)
     {
@@ -289,5 +488,39 @@
         {
             _loading = false;
         }
+    }
+
+    private async Task Previous()
+    {
+        if (_List is null || _List.Count == 0) return;
+        if (_currentIndex > 0)
+        {
+            _currentIndex--;
+            // LoadJobRequestAtCurrentIndex();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task Next()
+    {
+        if (_List is null || _List.Count == 0) return;
+        if (_currentIndex < _List.Count - 1)
+        {
+            _currentIndex++;
+            // LoadJobRequestAtCurrentIndex();
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task OnRowClickOutlet(DataGridRowClickEventArgs<OutletDto> args)
+    {
+        _currentDto = args.Item;
+        if (_currentDto == null) return;
+
+        _model = Mapper.Map<AddEditOutletCommand>(_currentDto);
+        _purchaseOrder = await Mediator.Send(new GetAllPurchaseOrderByIdQuery { OutletId = _currentDto.Id });
+
+        _drawerCustomer = true;
+        await InvokeAsync(StateHasChanged);
     }
 }
