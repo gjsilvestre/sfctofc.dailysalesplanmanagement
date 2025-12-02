@@ -9,6 +9,7 @@
 
 @using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
 @using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.Pagination;
+@using System.Diagnostics
 
 @inject IStringLocalizer<Dashboard> L
 @inject IUserProfileState UserProfileState
@@ -178,7 +179,8 @@
 
     <DashboardSalesmanActivity />
 
-    <MudDataGrid T="SalesmanTrackerDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)"
+    <MudDataGrid T="SalesmanDailyPlansDto"
+        Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)"
                  FixedHeader="true" FixedFooter="false" Loading="@_loading" ColumnResizeMode="ResizeMode.Column" 
                  Striped="true" Dense="true" Hover="true" @ref="_dataGridSalesmanTracket" RowsPerPage="20" Style="height:100%; overflow:auto;">
         <ToolBarContent>
@@ -190,7 +192,10 @@
                                 <MudText Typo="Typo.h5" Class="mb-2 fw-bold"><b>Todays Plan</b></MudText>
 
                                 <MudToolBar Dense WrapContent="true" Class="py-1 px-0">
-                                    <MudDatePicker Label="Date" Class="ml-4" Margin="Margin.Dense" Variant="Variant.Outlined" />
+                                    @* <MudDatePicker Label="Date" Class="ml-4" Margin="Margin.Dense" Variant="Variant.Outlined" /> *@
+                                    <MudDatePicker @bind-Date="selectedDate" />
+
+
                                 </MudToolBar>
                             </MudStack>
                         </div>
@@ -226,20 +231,16 @@
                 </MudStack>
             </MudStack>
         </ToolBarContent>
-
         <Columns>
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.Name" Title="Salesman" />
-            @* <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.Date" Title="Date">
-                <CellTemplate>
-                    @(context.Item.Date?.ToString("MMM dd, yyyy") ?? "")
-                </CellTemplate>
-            </PropertyColumn> *@
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.TargetSales" Title="Target Sales" />
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.ActualSales" Title="Actual Sales" />
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.TargetStoreVisited" Title="Scheduled" />
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.ActualStoreVisited" Title="Visited" />
-            <PropertyColumn HeaderStyle="font-weight: bold; width: 106px;" Property="x => x.Skipped" Title="Skipped" />
-        </Columns>
+            <PropertyColumn Property="x => x.UserName" Title="Salesman" />
+            <PropertyColumn Property="x => x.OutletCount" Title="No. of Outlets" />
+            <PropertyColumn Property="x => x.TargetSales" Title="Target Sales" />
+            <PropertyColumn Property="x => x.ActualSales" Title="Actual Sales" />
+            @* <PropertyColumn Property="x => x.ScheduledCount" Title="Scheduled" /> *@
+            <PropertyColumn Property="x => x.CheckedInCount" Title="Visited" />
+            <PropertyColumn Property="x => x.SkippedCount" Title="Skipped" />
+
+          </Columns>
 
         <NoRecordsContent>
             <MudText>@ConstantString.NoRecords</MudText>
@@ -262,8 +263,38 @@
     private PaginationQuerySalesmanTracker _paginationQuery { get; } = new();
     private bool _loading;
 
-    private List<SalesmanTrackerDto> _List = new();
-    private MudDataGrid<SalesmanTrackerDto> _dataGridSalesmanTracket = default!;
+    private List<SalesmanDailyPlansDto> _List = new();
+    private MudDataGrid<SalesmanDailyPlansDto> _dataGridSalesmanTracket = default!;
+    // private DateTime? _selectedDate = DateTime.Today;
+    private DateTime? _selectedDate = DateTime.Today;
+    private DateTime? selectedDate
+    {
+        get => _selectedDate;
+        set
+        {
+            if (_selectedDate != value)
+            {
+                _selectedDate = value;
+                _paginationQuery.Date = value;
+                _ = _dataGridSalesmanTracket.ReloadServerData();
+            }
+        }
+    }
+
+
+    private async Task OnDateChanged(DateTime? date)
+    {
+        _paginationQuery.Date = date;
+        await _dataGridSalesmanTracket.ReloadServerData();
+    }
+
+
+    private async Task ReloadGridByDate()
+    {
+        _paginationQuery.Date = selectedDate;
+        await _dataGridSalesmanTracket.ReloadServerData();
+    }
+
 
     protected override void OnInitialized()
     {
@@ -286,7 +317,7 @@
         InvokeAsync(StateHasChanged);
     }
 
-    private async Task<GridData<SalesmanTrackerDto>> ServerReload(GridState<SalesmanTrackerDto> state)
+    private async Task<GridData<SalesmanDailyPlansDto>> ServerReload(GridState<SalesmanDailyPlansDto> state)
     {
         try
         {
@@ -300,8 +331,9 @@
             _paginationQuery.PageSize = state.PageSize;
 
             var result = await Mediator.Send(_paginationQuery).ConfigureAwait(false);
-            _List = result.Items?.ToList() ?? new List<SalesmanTrackerDto>();
-            return new GridData<SalesmanTrackerDto> { TotalItems = result.TotalItems, Items = _List };
+            Debug.WriteLine("DEBUG: ", result);
+            _List = result.Items?.ToList() ?? new List<SalesmanDailyPlansDto>();
+            return new GridData<SalesmanDailyPlansDto> { TotalItems = result.TotalItems, Items = _List };
         }
         finally
         {

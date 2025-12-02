@@ -221,11 +221,10 @@
         <Columns>
             <PropertyColumn Property="x => x.TaskName" Title="Task" />
             <PropertyColumn Property="x => x.OutletName" Title="Outlet" />
-            @* <PropertyColumn Property="x => x.OutletAddress" Title="Address" /> *@
+            @* <PropertyColumn Property="x => x.UpdatedAt" Title="Outlet" /> *@
+            <PropertyColumn Property="x => x.DailyPlanDate" Title="Outlet Plan Date" />
             <PropertyColumn Property="x => x.OutletProvince" Title="Province" />
             <PropertyColumn Property="x => x.OutletRegion" Title="Region" />
-
-
             <PropertyColumn Property="x => x.AssignedTo!.UserName" Title="Salesman" />
             <PropertyColumn Property="x => x.CreatedBy!.UserName" Title="Assigned By" />
             <PropertyColumn Property="x => x.IsCompleted" Title="Done?" />
