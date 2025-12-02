@@ -46,7 +46,7 @@ public class ApplicationDbContextInitializer
             await SeedTenantsAsync();
             await SeedRolesAsync();
             await SeedUsersAsync();
-            await SeedDataAsync();
+            //await SeedDataAsync();
             _context.ChangeTracker.Clear();
         }
         catch (Exception ex)
@@ -172,183 +172,183 @@ public class ApplicationDbContextInitializer
         await _userManager.AddToRoleAsync(demoUser, RoleName.Basic);
     }
 
-    private async Task SeedDataAsync()
-    {
-        if (!await _context.PicklistSets.AnyAsync())
-        {
+    //private async Task SeedDataAsync()
+    //{
+    //    if (!await _context.PicklistSets.AnyAsync())
+    //    {
 
-            _logger.LogInformation("Seeding key values...");
-            var keyValues = new[]
-            {
-                new PicklistSet
-                {
-                    Name = Picklist.Status,
-                    Value = "initialization",
-                    Text = "Initialization",
-                    Description = "Status of workflow"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Status,
-                    Value = "processing",
-                    Text = "Processing",
-                    Description = "Status of workflow"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Status,
-                    Value = "pending",
-                    Text = "Pending",
-                    Description = "Status of workflow"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Status,
-                    Value = "done",
-                    Text = "Done",
-                    Description = "Status of workflow"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Brand,
-                    Value = "Apple",
-                    Text = "Apple",
-                    Description = "Brand of production"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Brand,
-                    Value = "Google",
-                    Text = "Google",
-                    Description = "Brand of production"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Brand,
-                    Value = "Microsoft",
-                    Text = "Microsoft",
-                    Description = "Brand of production"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Unit,
-                    Value = "EA",
-                    Text = "EA",
-                    Description = "Unit of product"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Unit,
-                    Value = "KM",
-                    Text = "KM",
-                    Description = "Unit of product"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Unit,
-                    Value = "PC",
-                    Text = "PC",
-                    Description = "Unit of product"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.Unit,
-                    Value = "L",
-                    Text = "L",
-                    Description = "Unit of product"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.CivilStatus,
-                    Value = "Single",
-                    Text = "Single",
-                    Description = "Single"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.CivilStatus,
-                    Value = "Married",
-                    Text = "Married",
-                    Description = "Married"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.CivilStatus,
-                    Value = "Widowed",
-                    Text = "Widowed",
-                    Description = "Widowed"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.CivilStatus,
-                    Value = "Divorced",
-                    Text = "Divorced",
-                    Description = "Divorced"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.CivilStatus,
-                    Value = "Separated",
-                    Text = "Separated",
-                    Description = "Separated"
-                },
-                new PicklistSet
-                {
-                    Name = Picklist.CivilStatus,
-                    Value = "Annulled",
-                    Text = "Annulled",
-                    Description = "Annulled"
-                }
-            };
+    //        _logger.LogInformation("Seeding key values...");
+    //        var keyValues = new[]
+    //        {
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Status,
+    //                Value = "initialization",
+    //                Text = "Initialization",
+    //                Description = "Status of workflow"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Status,
+    //                Value = "processing",
+    //                Text = "Processing",
+    //                Description = "Status of workflow"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Status,
+    //                Value = "pending",
+    //                Text = "Pending",
+    //                Description = "Status of workflow"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Status,
+    //                Value = "done",
+    //                Text = "Done",
+    //                Description = "Status of workflow"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Brand,
+    //                Value = "Apple",
+    //                Text = "Apple",
+    //                Description = "Brand of production"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Brand,
+    //                Value = "Google",
+    //                Text = "Google",
+    //                Description = "Brand of production"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Brand,
+    //                Value = "Microsoft",
+    //                Text = "Microsoft",
+    //                Description = "Brand of production"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Unit,
+    //                Value = "EA",
+    //                Text = "EA",
+    //                Description = "Unit of product"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Unit,
+    //                Value = "KM",
+    //                Text = "KM",
+    //                Description = "Unit of product"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Unit,
+    //                Value = "PC",
+    //                Text = "PC",
+    //                Description = "Unit of product"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.Unit,
+    //                Value = "L",
+    //                Text = "L",
+    //                Description = "Unit of product"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.CivilStatus,
+    //                Value = "Single",
+    //                Text = "Single",
+    //                Description = "Single"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.CivilStatus,
+    //                Value = "Married",
+    //                Text = "Married",
+    //                Description = "Married"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.CivilStatus,
+    //                Value = "Widowed",
+    //                Text = "Widowed",
+    //                Description = "Widowed"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.CivilStatus,
+    //                Value = "Divorced",
+    //                Text = "Divorced",
+    //                Description = "Divorced"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.CivilStatus,
+    //                Value = "Separated",
+    //                Text = "Separated",
+    //                Description = "Separated"
+    //            },
+    //            new PicklistSet
+    //            {
+    //                Name = Picklist.CivilStatus,
+    //                Value = "Annulled",
+    //                Text = "Annulled",
+    //                Description = "Annulled"
+    //            }
+    //        };
 
-            await _context.PicklistSets.AddRangeAsync(keyValues);
-            await _context.SaveChangesAsync();
-        }
+    //        await _context.PicklistSets.AddRangeAsync(keyValues);
+    //        await _context.SaveChangesAsync();
+    //    }
 
-        if (!await _context.Products.AnyAsync())
-        {
+    //    if (!await _context.Products.AnyAsync())
+    //    {
 
-            _logger.LogInformation("Seeding products...");
-            var products = new[]
-            {
-                new Product
-                {
-                    Brand = "Apple",
-                    Name = "IPhone 13 Pro",
-                    Description =
-                    "Apple iPhone 13 Pro smartphone. Announced Sep 2021. Features 6.1″ display, Apple A15 Bionic chipset, 3095 mAh battery, 1024 GB storage.",
-                    Unit = "EA",
-                    Price = 999.98m
-                },
-                new Product
-                {
-                    Brand = "Sony",
-                    Name = "WH-1000XM4",
-                    Description = "Sony WH-1000XM4 Wireless Noise-Canceling Over-Ear Headphones. Features industry-leading noise cancellation, up to 30 hours of battery life, touch sensor controls.",
-                    Unit = "EA",
-                    Price = 349.99m
-                },
-                new Product
-                {
-                    Brand = "Nintendo",
-                    Name = "Switch OLED Model",
-                    Description = "Nintendo Switch OLED Model console. Released October 2021. Features 7″ OLED screen, 64GB internal storage, enhanced audio, dock with wired LAN port.",
-                    Unit = "EA",
-                    Price = 349.99m
-                },
-                new Product
-                {
-                    Brand = "Apple",
-                    Name = "MacBook Air M1",
-                    Description = "Apple MacBook Air with M1 chip. Features 13.3″ Retina display, Apple M1 chip with 8‑core CPU, 8GB RAM, 256GB SSD storage, up to 18 hours of battery life.",
-                    Unit = "EA",
-                    Price = 999.99m
-                }
+    //        _logger.LogInformation("Seeding products...");
+    //        var products = new[]
+    //        {
+    //            new Product
+    //            {
+    //                Brand = "Apple",
+    //                Name = "IPhone 13 Pro",
+    //                Description =
+    //                "Apple iPhone 13 Pro smartphone. Announced Sep 2021. Features 6.1″ display, Apple A15 Bionic chipset, 3095 mAh battery, 1024 GB storage.",
+    //                Unit = "EA",
+    //                Price = 999.98m
+    //            },
+    //            new Product
+    //            {
+    //                Brand = "Sony",
+    //                Name = "WH-1000XM4",
+    //                Description = "Sony WH-1000XM4 Wireless Noise-Canceling Over-Ear Headphones. Features industry-leading noise cancellation, up to 30 hours of battery life, touch sensor controls.",
+    //                Unit = "EA",
+    //                Price = 349.99m
+    //            },
+    //            new Product
+    //            {
+    //                Brand = "Nintendo",
+    //                Name = "Switch OLED Model",
+    //                Description = "Nintendo Switch OLED Model console. Released October 2021. Features 7″ OLED screen, 64GB internal storage, enhanced audio, dock with wired LAN port.",
+    //                Unit = "EA",
+    //                Price = 349.99m
+    //            },
+    //            new Product
+    //            {
+    //                Brand = "Apple",
+    //                Name = "MacBook Air M1",
+    //                Description = "Apple MacBook Air with M1 chip. Features 13.3″ Retina display, Apple M1 chip with 8‑core CPU, 8GB RAM, 256GB SSD storage, up to 18 hours of battery life.",
+    //                Unit = "EA",
+    //                Price = 999.99m
+    //            }
 
-            };
+    //        };
 
-            await _context.Products.AddRangeAsync(products);
-            await _context.SaveChangesAsync();
-        }
-    }
+    //        await _context.Products.AddRangeAsync(products);
+    //        await _context.SaveChangesAsync();
+    //    }
+    //}
 }

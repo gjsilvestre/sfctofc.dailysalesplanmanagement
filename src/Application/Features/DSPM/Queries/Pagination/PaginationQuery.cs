@@ -140,7 +140,7 @@ public class PaginationQueryPurchaseOrderHandler : IRequestHandler<PaginationQue
 
 #region Outlets
 
-public class PaginationQueryOutlets : AdvancedFilterOutlet, IRequest<PaginatedData<OutletDto>>
+public class PaginationQueryOutlets : AdvancedFilterOutlet, IRequest<PaginatedData<OutletsDto>>
 {
     public AdvancedSpecificationOutlet Specification => new(this);
     public string CacheKey => OutletsCacheKey.GetPaginationCacheKey($"{this}");
@@ -153,7 +153,7 @@ public class PaginationQueryOutlets : AdvancedFilterOutlet, IRequest<PaginatedDa
     }
 }
 
-public class PaginationQueryOutletHandler : IRequestHandler<PaginationQueryOutlets, PaginatedData<OutletDto>>
+public class PaginationQueryOutletHandler : IRequestHandler<PaginationQueryOutlets, PaginatedData<OutletsDto>>
 {
     private readonly IApplicationDbContextFactory _dbContextFactory;
     private readonly IMapper _mapper;
@@ -163,22 +163,20 @@ public class PaginationQueryOutletHandler : IRequestHandler<PaginationQueryOutle
         _mapper = mapper;
     }
 
-    public async Task<PaginatedData<OutletDto>> Handle(PaginationQueryOutlets request, CancellationToken cancellationToken)
+    public async Task<PaginatedData<OutletsDto>> Handle(PaginationQueryOutlets request, CancellationToken cancellationToken)
     {
         await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
         var query = from otl in db.Outlets.AsQueryable()
-                    select new OutletDto
+                    select new OutletsDto
                     {
                         Id = otl.Id,
-                        ExternalId = otl.ExternalId,
                         Name = otl.Name,
                         Address = otl.Address,
-                        Barangay = otl.Barangay,
                         City = otl.City,
                         Province = otl.Province,
                         Region = otl.Region,   
                         Latitude = otl.Latitude,
-                        Longitude = otl.Longitude,
+                        Longtitude = otl.Longtitude,
                         Channel = otl.Channel,
                         Salesman = otl.Salesman,
                         Supervisor = otl.Supervisor,
@@ -198,7 +196,7 @@ public class PaginationQueryOutletHandler : IRequestHandler<PaginationQueryOutle
             .Take(request.PageSize)
             .ToListAsync(cancellationToken);
 
-        return new PaginatedData<OutletDto>(items, totalCount, request.PageNumber, request.PageSize);
+        return new PaginatedData<OutletsDto>(items, totalCount, request.PageNumber, request.PageSize);
     }
 }
 

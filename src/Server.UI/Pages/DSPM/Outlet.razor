@@ -7,11 +7,13 @@
 @using SFCTOFC.DailySalesPlanManagement.Application.Features.Tenants.DTOs
 @using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Commands.AddEdit
 @using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.GetAll
+@using SFCTOFC.DailySalesPlanManagement.Domain.Identity;
 @using MudBlazor.Utilities
 
 @using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
 @using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.Pagination;
 
+@inherits OwningComponentBase
 @inject IStringLocalizer<Outlet> L
 @inject IUserProfileState UserProfileState
 @inject ITenantSwitchService TenantSwitchService
@@ -187,7 +189,7 @@
         </MudCardContent>
     </MudCard>
 
-    <MudDataGrid T="OutletDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)" RowClick="OnRowClickOutlet"
+    <MudDataGrid T="OutletsDto" Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)" RowClick="OnRowClickOutlet"
                  FixedHeader="true" FixedFooter="false" Loading="@_loading" ColumnResizeMode="ResizeMode.Column"
                  Striped="true" Dense="true" Hover="true" @ref="_dataGridOutlet" RowsPerPage="20" Style="height:100%; overflow:auto;">
         <ToolBarContent>
@@ -447,9 +449,10 @@
 </MudDrawer>
 
 @code {
-    public string Title { get; set; } = "Outlet";
+    public string Title { get; set; } = "Outlets";
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
     [CascadingParameter] private UserProfile? UserProfile { get; set; }
+    private UserManager<ApplicationUser> _userManager = null!;
     private OutletAccessRights _accessRights = new();
     private PaginationQueryOutlets _paginationQuery { get; } = new();
     private bool _loading;
@@ -457,9 +460,9 @@
     private bool _drawerCustomer;
 
     private int _currentIndex = 0;
-    private OutletDto _currentDto = new();
-    private List<OutletDto> _List = new();
-    private MudDataGrid<OutletDto> _dataGridOutlet = default!;
+    private OutletsDto _currentDto = new();
+    private List<OutletsDto> _List = new();
+    private MudDataGrid<OutletsDto> _dataGridOutlet = default!;
 
     private MudForm? _form;
     private AddEditOutletCommand _model = new();
@@ -467,7 +470,12 @@
     private MudDataGrid<PurchaseOrderDto> _dataGridPurchaseOrder = default!;
     private IEnumerable<PurchaseOrderDto> _purchaseOrder = new List<PurchaseOrderDto>();
 
-    private async Task<GridData<OutletDto>> ServerReload(GridState<OutletDto> state)
+    protected override async Task OnInitializedAsync()
+    {
+        _userManager = ScopedServices.GetRequiredService<UserManager<ApplicationUser>>();        
+    }
+
+    private async Task<GridData<OutletsDto>> ServerReload(GridState<OutletsDto> state)
     {
         try
         {
@@ -480,9 +488,38 @@
             _paginationQuery.PageNumber = state.Page + 1;
             _paginationQuery.PageSize = state.PageSize;
 
-            var result = await Mediator.Send(_paginationQuery).ConfigureAwait(false);
-            _List = result.Items?.ToList() ?? new List<OutletDto>();
-            return new GridData<OutletDto> { TotalItems = result.TotalItems, Items = _List };
+            var data = await Mediator.Send(_paginationQuery).ConfigureAwait(false);
+
+            var result = await Task.Run(() =>
+            {
+                return (from dt in data.Items
+                        join us in _userManager.Users on dt.Salesman equals us.Id
+                        select new OutletsDto
+                        {
+                            Id = dt.Id,
+                            Name = dt.Name,
+                            Address = dt.Address,
+                            City = dt.City,
+                            Province = dt.Province,
+                            Region = dt.Region,
+                            Channel = dt.Channel,
+                            Salesman = us.DisplayName
+                        }).ToList();
+            });
+
+            // result is already a List<OutletsDto>
+            var list = result ?? new List<OutletsDto>();
+
+            return new GridData<OutletsDto>
+            {
+                TotalItems = list.Count,
+                Items = list
+            };
+
+        }
+        catch (Exception ex)
+        {
+            throw ex.InnerException;
         }
         finally
         {
@@ -512,7 +549,7 @@
         }
     }
 
-    private async Task OnRowClickOutlet(DataGridRowClickEventArgs<OutletDto> args)
+    private async Task OnRowClickOutlet(DataGridRowClickEventArgs<OutletsDto> args)
     {
         _currentDto = args.Item;
         if (_currentDto == null) return;

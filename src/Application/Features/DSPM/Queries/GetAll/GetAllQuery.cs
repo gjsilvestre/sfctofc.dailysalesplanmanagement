@@ -5,13 +5,13 @@ using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
 namespace SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Queries.GetAll;
 
 #region OUTLETS
-public class GetAllOutletsQuery : IRequest<IEnumerable<OutletDto>>
+public class GetAllOutletsQuery : IRequest<IEnumerable<OutletsDto>>
 {
     public string CacheKey => OutletsCacheKey.GetAllCacheKey;
     public IEnumerable<string>? Tags => OutletsCacheKey.Tags;
 }
 
-public class GetOutletsQuery : ICacheableRequest<OutletDto?>
+public class GetOutletsQuery : ICacheableRequest<OutletsDto?>
 {
     public required int Id { get; set; }
 
@@ -20,8 +20,8 @@ public class GetOutletsQuery : ICacheableRequest<OutletDto?>
 }
 
 public class GetAllOutletsQueryHandler :
-    IRequestHandler<GetAllOutletsQuery, IEnumerable<OutletDto>>,
-    IRequestHandler<GetOutletsQuery, OutletDto?>
+    IRequestHandler<GetAllOutletsQuery, IEnumerable<OutletsDto>>,
+    IRequestHandler<GetOutletsQuery, OutletsDto?>
 {
     private readonly IMapper _mapper;
     private readonly IApplicationDbContextFactory _dbContextFactory;
@@ -35,21 +35,21 @@ public class GetAllOutletsQueryHandler :
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<IEnumerable<OutletDto>> Handle(GetAllOutletsQuery request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<OutletsDto>> Handle(GetAllOutletsQuery request, CancellationToken cancellationToken)
     {
         await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
         var data = await db.Outlets
-            .ProjectTo<OutletDto>(_mapper.ConfigurationProvider)
+            .ProjectTo<OutletsDto>(_mapper.ConfigurationProvider)
             .ToListAsync(cancellationToken);
         return data;
     }
 
-    public async Task<OutletDto?> Handle(GetOutletsQuery request, CancellationToken cancellationToken)
+    public async Task<OutletsDto?> Handle(GetOutletsQuery request, CancellationToken cancellationToken)
     {
         await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
         var data = await db.Outlets.Where(x => x.Id == request.Id)
-                       .ProjectTo<OutletDto>(_mapper.ConfigurationProvider)
-                       .FirstOrDefaultAsync(cancellationToken);
+                           .ProjectTo<OutletsDto>(_mapper.ConfigurationProvider)
+                           .FirstOrDefaultAsync(cancellationToken);
         return data;
     }
 }

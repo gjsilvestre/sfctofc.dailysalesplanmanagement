@@ -1,9 +1,7 @@
 ﻿
 
-using DocumentFormat.OpenXml.Office2010.Excel;
 using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Caching;
 using SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.DTOs;
-using SFCTOFC.DailySalesPlanManagement.Application.Features.Products.Commands.AddEdit;
 
 namespace SFCTOFC.DailySalesPlanManagement.Application.Features.DSPM.Commands.AddEdit;
 public class AddEditCommandPurchaseOrder : ICacheInvalidatorRequest<Result<int>>
@@ -100,7 +98,7 @@ public class AddEditOutletCommand : ICacheInvalidatorRequest<Result<int>>
     {
         public Mapping()
         {
-            CreateMap<OutletDto, AddEditOutletCommand>().ReverseMap();
+            CreateMap<OutletsDto, AddEditOutletCommand>().ReverseMap();
             CreateMap<AddEditOutletCommand, Outlets>(MemberList.None)
                 .ForMember(dest => dest.CreatedBy, opt => opt.Ignore());
         }
