@@ -1,5 +1,9 @@
 ﻿@page "/"
 
+@* @using SFCTOFC.DailySalesPlanManagement.Application.Features.SalesmanDailyPlan.Commands *@
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.SalesmanDailyPlan.Commands
+@using SFCTOFC.DailySalesPlanManagement.Application.Features.SalesmanDailyPlan.Queries
+@using SFCTOFC.DailySalesPlanManagement.Infrastructure.Persistence
 @using SFCTOFC.DailySalesPlanManagement.Server.UI.Pages.Dashboard.Components
 @using SFCTOFC.DailySalesPlanManagement.Application.Common.Security
 @using SFCTOFC.DailySalesPlanManagement.Application.Common.Interfaces.Identity
@@ -14,14 +18,18 @@
 @inject IStringLocalizer<Dashboard> L
 @inject IUserProfileState UserProfileState
 @inject ITenantSwitchService TenantSwitchService
+@using System.Globalization
+@inject IDbContextFactory<ApplicationDbContext> _dbContextFactory
 
 <style>
+
     @@import url("https://cdn.jsdelivr.net/npm/@@fancyapps/ui@@5.0.36/dist/fancybox/fancybox.css");
 
     .fancybox__container {
         --fancybox-bg: rgba(24, 24, 27, 0.85);
         z-index: 9999;
     }
+
 
     html, body {
         -moz-osx-font-smoothing: grayscale; /* Firefox on macOS */
@@ -51,11 +59,7 @@
         padding: 2px 6px !important;
     }
 
-    .mud-card-content {
-        flex-grow: 1;
-        padding: 17px;
-        margin-top: -36px !important;
-    }
+
 
     .mud-input-control > .mud-input-control-input-container > .mud-input-label-inputcontrol {
         font-size: 1rem !important;
@@ -79,6 +83,8 @@
         /* border-top: 1px solid #eaeaea; */
     }
 
+
+
     .force-row {
         display: flex !important;
         flex-direction: row !important;
@@ -99,6 +105,7 @@
     .gap-19 {
         /* column-gap: 159px; */
     }
+
 
     .mud-table-bordered th,
     .mud-table-bordered td {
@@ -130,6 +137,7 @@
         display: none !important;
     }
 
+
     .mud-table.mud-table-striped tbody tr:nth-child(odd) {
         background-color: #fafafa !important;
     }
@@ -137,6 +145,7 @@
     .mud-table.mud-table-striped tbody tr:nth-child(even) {
         background-color: #ebebeb !important;
     }
+
 
     .mud-table.mud-table-hover tbody tr:hover {
         background-color: #00baef !important;
@@ -152,10 +161,26 @@
         margin-left: auto !important;
     }
 
+
+
     .custom-pager .mud-datagrid-pager {
         display: flex !important;
         justify-content: space-between !important;
         align-items: center !important;
+    }
+    /* daya here for top spacing mawala lang sa page nato*/
+
+    .mud-main-content {
+        padding-top: 25px !important;
+    }
+
+    .mud-drawer-header {
+        display: flex !important;
+        min-height: 0px !important;
+        padding: 0px 0px 0px 0px !important;
+        padding-left: 15px !important;
+        padding-top: 10px !important;
+        min-height: 2px !important;
     }
 </style>
 
@@ -177,12 +202,26 @@
         </MudCardContent>
     </MudCard>
 
-    <DashboardSalesmanActivity />
+    <DashboardSalesmanActivity TotalTargetSales="TotalTargetSales"
+                               TotalActualSales="TotalActualSales"
+                               TotalTargetStores="TotalTargetStores"
+                               TotalActualStores="TotalActualStores" />
+
 
     <MudDataGrid T="SalesmanDailyPlansDto"
-        Class="ultra-compact-grid compact-padding mud-datagrid-header" ServerData="@(ServerReload)"
-                 FixedHeader="true" FixedFooter="false" Loading="@_loading" ColumnResizeMode="ResizeMode.Column" 
-                 Striped="true" Dense="true" Hover="true" @ref="_dataGridSalesmanTracket" RowsPerPage="20" Style="height:100%; overflow:auto;">
+                 Class="ultra-compact-grid compact-padding mud-datagrid-header" 
+                 ServerData="@(ServerReload)" 
+                 RowClick="OnRowClick"
+                 FixedHeader="true" 
+                 FixedFooter="false" 
+                 Loading="@_loading" 
+                 ColumnResizeMode="ResizeMode.Column" 
+                 Striped="true" 
+                 Dense="true" 
+                 Hover="true" 
+                 @ref="_dataGridSalesmanTracket" 
+                 RowsPerPage="20" 
+                 Style="height:100%; overflow:auto;">
         <ToolBarContent>
             <MudStack Row Spacing="0" Class="flex-grow-1 mb-5" Justify="Justify.SpaceBetween">
                 <MudStack Row AlignItems="AlignItems.End">
@@ -194,8 +233,6 @@
                                 <MudToolBar Dense WrapContent="true" Class="py-1 px-0">
                                     @* <MudDatePicker Label="Date" Class="ml-4" Margin="Margin.Dense" Variant="Variant.Outlined" /> *@
                                     <MudDatePicker @bind-Date="selectedDate" />
-
-
                                 </MudToolBar>
                             </MudStack>
                         </div>
@@ -234,13 +271,23 @@
         <Columns>
             <PropertyColumn Property="x => x.UserName" Title="Salesman" />
             <PropertyColumn Property="x => x.OutletCount" Title="No. of Outlets" />
-            <PropertyColumn Property="x => x.TargetSales" Title="Target Sales" />
-            <PropertyColumn Property="x => x.ActualSales" Title="Actual Sales" />
-            @* <PropertyColumn Property="x => x.ScheduledCount" Title="Scheduled" /> *@
+
+            <TemplateColumn Title="Target Sales">
+                <CellTemplate Context="x">
+                    ₱ @string.Format("{0:N2}", x.Item.TargetSales)
+                </CellTemplate>
+            </TemplateColumn>
+
+            <TemplateColumn Title="Actual Sales">
+                <CellTemplate Context="x">
+                    ₱ @string.Format("{0:N2}", x.Item.ActualSales)
+                </CellTemplate>
+            </TemplateColumn>
+
             <PropertyColumn Property="x => x.CheckedInCount" Title="Visited" />
             <PropertyColumn Property="x => x.SkippedCount" Title="Skipped" />
+        </Columns>
 
-          </Columns>
 
         <NoRecordsContent>
             <MudText>@ConstantString.NoRecords</MudText>
@@ -252,20 +299,196 @@
             <MudDataGridPager PageSizeOptions="@(new[] { 10, 20, 30, 50 })" Class="custom-pager" />
         </PagerContent>
     </MudDataGrid>
+
+    <MudDrawer Anchor="Anchor.Right"
+           @bind-Open="_showDrawer"
+           Elevation="5"
+           Width="70%"
+           Variant="DrawerVariant.Temporary">
+        <!-- HEADER (fixed) -->
+        <MudDrawerHeader Class="px-4 py-3 sticky-header mt-3">
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                <MudText Typo="Typo.h5" Class="fw-bold">
+                    @_selectedSalesmanName – Outlets
+                </MudText>
+
+                <MudIconButton Icon="@Icons.Material.Filled.Close"
+                               OnClick="() => _showDrawer = false" />
+            </div>
+        </MudDrawerHeader>
+
+
+
+        <MudCardContent Class="p-4 drawer-body mt-2">
+            <MudStack Row Justify="Justify.FlexEnd" Class="mb-3" Spacing="2">
+
+                @if (!_isEditAll)
+                {
+                    <MudButton StartIcon="@Icons.Material.Filled.Edit"
+                               Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               OnClick="EnableEditAll">
+                        Edit All
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton StartIcon="@Icons.Material.Filled.Check"
+                               Color="Color.Success"
+                               OnClick="SaveAllTargets">
+                        Save All
+                    </MudButton>
+
+                    <MudButton StartIcon="@Icons.Material.Filled.Close"
+                               Variant="Variant.Outlined"
+                               Color="Color.Error"
+                               OnClick="CancelAllEdit">
+                        Cancel
+                    </MudButton>
+                }
+
+            </MudStack>
+
+    @if (_selectedOutlets.Any())
+    {
+        <MudTable Items="_selectedOutlets" Dense="true" Hover="true" Bordered="false" Striped="true" Elevation="0">
+
+            <HeaderContent>
+                <MudTh>Outlet</MudTh>
+                <MudTh align="right">Target</MudTh>
+                <MudTh align="right">Actual</MudTh>
+                <MudTh align="center">Status</MudTh>
+                @* <MudTh align="center">Edit</MudTh> *@
+
+            </HeaderContent>
+
+                    <RowTemplate>
+                        <MudTd DataLabel="Outlet" Class="fw-bold">
+                            @context.OutletName
+                        </MudTd>
+
+                        <MudTd DataLabel="Target" Align="Align.Right">
+                            @if (_isEditAll)
+                            {
+                                <MudTextField @bind-Value="context.TargetSales"
+                                              Variant="Variant.Outlined"
+                                              Size="Size.Small"
+                                              Immediate="true" />
+                            }
+                            else
+                            {
+                                @string.Format("{0:N2}", context.TargetSales)
+                            }
+                        </MudTd>
+
+                      
+
+                        <MudTd DataLabel="Actual" Align="Align.Right">
+                            ₱ @string.Format("{0:N2}", context.ActualSales)
+                        </MudTd>
+
+                        <MudTd DataLabel="Status" Align="Align.Center">
+                            <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.ColorStatus)">
+                                @context.ColorStatus
+                            </MudChip>
+                        </MudTd>
+
+                 
+
+                    </RowTemplate>
+
+
+        </MudTable>
+    }
+    else
+    {
+        <MudText Align="Align.Center" Color="Color.Error" Class="mt-6">
+            NO DATA FOUND
+        </MudText>
+    }
+
+</MudCardContent>
+
+</MudDrawer>
+
 </ErrorBoundary>
-
-
 @code {
+
+
     public string Title { get; set; } = "Salesman Activities";
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
     [CascadingParameter] private UserProfile? UserProfile { get; set; }
     private ProductsAccessRights _accessRights = new();
     private PaginationQuerySalesmanTracker _paginationQuery { get; } = new();
     private bool _loading;
+    private decimal? TotalTargetSales { get; set; }
+    private decimal? TotalActualSales { get; set; }
+    private int TotalTargetStores { get; set; }
+    private int TotalActualStores { get; set; }
+    private int? _editTargetId = null;
+    bool _isEditAll = false;
+    void EnableEditAll()
+    {
+        _isEditAll = true;
+    }
+
+    async Task SaveAllTargets()
+    {
+        _isEditAll = false;
+
+        foreach (var outlet in _selectedOutlets)
+        {
+            await SaveTarget(outlet);
+        }
+    }
+
+    void CancelAllEdit()
+    {
+        _isEditAll = false;
+        StateHasChanged();
+    }
+
+    private void EditTarget(int id)
+    {
+        _editTargetId = id;
+    }
+
+    private void CancelEdit()
+    {
+        _editTargetId = null;
+    }
+
+    private async Task SaveTarget(SalesmanDailyPlansDto plan)
+    {
+        try
+        {
+            var result = await Mediator.Send(new UpdateTargetSalesCommand
+            {
+                Id = plan.Id,
+                TargetSales = plan.TargetSales ?? 0
+            });
+            if (true)
+            {
+                _editTargetId = null;
+                _selectedOutlets = await Mediator.Send(
+                    new GetSalesmanOutletsQuery(_selectedSalesmanName, _paginationQuery.Date));
+            }
+            else
+            {
+                Console.WriteLine("Failed to update target sales.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving target: {ex.Message}");
+        }
+    }
+
 
     private List<SalesmanDailyPlansDto> _List = new();
     private MudDataGrid<SalesmanDailyPlansDto> _dataGridSalesmanTracket = default!;
     // private DateTime? _selectedDate = DateTime.Today;
+
     private DateTime? _selectedDate = DateTime.Today;
     private DateTime? selectedDate
     {
@@ -280,6 +503,75 @@
             }
         }
     }
+    Color GetStatusColor(string status)
+    {
+        return status switch
+        {
+            "Checked Out" => Color.Success,
+            "Checked In" => Color.Info,
+            "Skipped" => Color.Error,
+            "Not Yet Started" => Color.Warning,
+            _ => Color.Default
+        };
+    }
+
+    private bool _showDrawer;
+    private string _selectedSalesmanName = "";
+    private List<SalesmanDailyPlansDto> _selectedOutlets = new();
+    private SalesmanDailyPlansDto _viewPlan = new();
+
+
+    private async Task OnRowClick(DataGridRowClickEventArgs<SalesmanDailyPlansDto> args)
+    {
+        _viewPlan = args.Item;
+        _selectedSalesmanName = _viewPlan.UserName;
+
+        _selectedOutlets = await Mediator.Send(
+         new GetSalesmanOutletsQuery(
+             _viewPlan.UserName,
+             _paginationQuery.Date
+             )
+         );
+
+        Console.WriteLine($"RETURNED {_selectedOutlets.Count} OUTLETS");
+
+        _showDrawer = true;
+
+    }
+
+
+    private Color GetStatusColor(SalesmanDailyPlansDto data)
+    {
+        if (data.CheckedIn.HasValue && data.CheckedOut.HasValue)
+            return Color.Success;
+
+        if (data.CheckedIn.HasValue)
+            return Color.Info;
+
+        if (data.Skipped.HasValue)
+            return Color.Error;
+
+        return Color.Warning;
+    }
+
+
+
+
+    private string GetStatusText(SalesmanDailyPlansDto data)
+    {
+        if (data.CheckedIn.HasValue && data.CheckedOut.HasValue)
+            return "Checked Out";
+
+        if (data.CheckedIn.HasValue)
+            return "Checked In";
+
+        if (data.Skipped.HasValue)
+            return "Skipped";
+
+        return "Unbegun";
+    }
+
+
 
 
     private async Task OnDateChanged(DateTime? date)
@@ -287,7 +579,6 @@
         _paginationQuery.Date = date;
         await _dataGridSalesmanTracket.ReloadServerData();
     }
-
 
     private async Task ReloadGridByDate()
     {
@@ -305,6 +596,7 @@
     protected override async Task OnInitializedAsync()
     {
         UserProfileState.Changed += OnUserProfileChanged;
+        _paginationQuery.Date = selectedDate;
     }
 
     public void Dispose()
@@ -333,6 +625,12 @@
             var result = await Mediator.Send(_paginationQuery).ConfigureAwait(false);
             Debug.WriteLine("DEBUG: ", result);
             _List = result.Items?.ToList() ?? new List<SalesmanDailyPlansDto>();
+
+            TotalTargetSales = _List.Sum(x => x.TargetSales);
+            TotalActualSales = _List.Sum(x => x.ActualSales);
+            TotalTargetStores = _List.Sum(x => x.OutletCount);
+            TotalActualStores = _List.Sum(x => x.CheckedInCount);
+
             return new GridData<SalesmanDailyPlansDto> { TotalItems = result.TotalItems, Items = _List };
         }
         finally

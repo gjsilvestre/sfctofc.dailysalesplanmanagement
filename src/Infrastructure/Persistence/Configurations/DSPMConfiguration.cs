@@ -5,6 +5,13 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace SFCTOFC.DailySalesPlanManagement.Infrastructure.Persistence.Configurations;
 
 #nullable disable
+public class SalesmanDailyPlansConfiguration : IEntityTypeConfiguration<SalesmanDailyPlans>
+{
+    public void Configure(EntityTypeBuilder<SalesmanDailyPlans> builder)
+    {
+        builder.HasKey(x => x.Id);
+    }
+}
 public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder>
 {
     public void Configure(EntityTypeBuilder<PurchaseOrder> builder)

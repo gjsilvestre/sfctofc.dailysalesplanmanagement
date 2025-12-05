@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
@@ -95,7 +96,7 @@ public class OutletTasks
 }
 
 
-public class DistributorOutlet
+public class Outlets
 {
     public int Id { get; set; }
     public string? Distributor { get; set; }
@@ -126,13 +127,14 @@ public class DistributorOutlet
 }
 public class SalesmanDailyPlans
 {
+    [Key]
     public int Id { get; set; }
     public int UserId { get; set; } // from Users
     public int OutletId { get; set; }
 
     // ONE navigation only
     [ForeignKey(nameof(OutletId))]
-    public DistributorOutlet? Outlet { get; set; }
+    public Outlets? Outlet { get; set; }
 
     [ForeignKey(nameof(UserId))]
     public Users? User { get; set; }

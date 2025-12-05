@@ -444,10 +444,10 @@
             return;
         }
 
-        // Always assign supervisor as creator (ID = 2)
+    
         _model.CreatedByUserId = 2;
 
-        // Optionally, also ensure AssignedToUserId is set from selected plan
+  
         if (_model.AssignedToUserId == 0 && _dailyPlans.Any())
         {
             var selectedPlan = _dailyPlans.FirstOrDefault(p => p.Id == _model.SalesmanDailyPlanId);

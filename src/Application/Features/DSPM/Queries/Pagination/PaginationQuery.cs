@@ -24,6 +24,7 @@ public class PaginationQuerySalesmanTracker : AdvancedFilterSalesmanTracker, IRe
             $"OrderBy:{OrderBy},{PageNumber},{PageSize}";
     }
 }
+
 public class PaginationQuerySalesmanTrackerHandler : IRequestHandler<PaginationQuerySalesmanTracker, PaginatedData<SalesmanDailyPlansDto>>
 {
     private readonly IApplicationDbContextFactory _dbContextFactory;
@@ -42,7 +43,7 @@ public class PaginationQuerySalesmanTrackerHandler : IRequestHandler<PaginationQ
         await using var db = await _dbContextFactory.CreateAsync(cancellationToken);
 
         var query = db.SalesmanDailyPlans
-                      .Include(x => x.User) // include navigation property now
+                      .Include(x => x.User) 
                       .AsQueryable();
 
    
@@ -51,8 +52,6 @@ public class PaginationQuerySalesmanTrackerHandler : IRequestHandler<PaginationQ
             var selectedDate = request.Date.Value.Date;
             query = query.Where(x => x.PlanDate.HasValue && x.PlanDate.Value.Date == selectedDate);
         }
-
-   
         if (request.CurrentUser != null && int.TryParse(request.CurrentUser.UserId, out var userId))
         {
             query = query.Where(x => x.UserId == userId);
@@ -64,15 +63,14 @@ public class PaginationQuerySalesmanTrackerHandler : IRequestHandler<PaginationQ
             .GroupBy(x => new
             {
                 x.UserId,
-                x.User.FirstName,
+                x.User.UserName,
                 PlanDate = x.PlanDate?.Date
             })
             .Select(g => new SalesmanDailyPlansDto
             {
                 UserId = g.Key.UserId,
-                UserName = g.Key.FirstName,
+                UserName = g.Key.UserName,
                 PlanDate = g.Key.PlanDate,
-
                 OutletCount = g.Count(), 
                 TargetSales = g.Sum(x => x.TargetSales),
                 ActualSales = g.Sum(x => x.ActualSales),
@@ -149,7 +147,7 @@ public class PaginationQueryPurchaseOrderHandler : IRequestHandler<PaginationQue
                         VendorAddress = po.VendorAddress,
                         DeliveryDate = po.DeliveryDate,
                         CancelDate = po.CancelDate,
-                        Salesman = ot.Salesman,
+                        //Salesman = ot.Salesman,
                         Status = po.Status
                     };
 
@@ -206,23 +204,23 @@ public class PaginationQueryOutletHandler : IRequestHandler<PaginationQueryOutle
         var query = from otl in db.Outlets.AsQueryable()
                     select new OutletDto
                     {
-                        Id = otl.Id,
-                        ExternalId = otl.ExternalId,
-                        Name = otl.Name,
-                        Address = otl.Address,
-                        Barangay = otl.Barangay,
-                        City = otl.City,
-                        Province = otl.Province,
-                        Region = otl.Region,   
-                        Latitude = otl.Latitude,
-                        Longitude = otl.Longitude,
-                        Channel = otl.Channel,
-                        Salesman = otl.Salesman,
-                        Supervisor = otl.Supervisor,
-                        BusinessDivision = otl.BusinessDivision,
-                        Route = otl.Route,
-                        CallSequence = otl.CallSequence,
-                        Image = otl.Image
+                        //Id = otl.Id,
+                        //ExternalId = otl.ExternalId,
+                        //Name = otl.Name,
+                        //Address = otl.Address,
+                        //Barangay = otl.Barangay,
+                        //City = otl.City,
+                        //Province = otl.Province,
+                        //Region = otl.Region,   
+                        //Latitude = otl.Latitude,
+                        //Longitude = otl.Longitude,
+                        //Channel = otl.Channel,
+                        //Salesman = otl.Salesman,
+                        //Supervisor = otl.Supervisor,
+                        //BusinessDivision = otl.BusinessDivision,
+                        //Route = otl.Route,
+                        //CallSequence = otl.CallSequence,
+                        //Image = otl.Image
                     };
 
         // Apply sorting
