@@ -13,7 +13,6 @@ public record GetSalesmanOutletsQuery(
     DateTime? Date
 ) : IRequest<List<SalesmanDailyPlansDto>>;
 
-
 public class GetSalesmanOutletsQueryHandler
     : IRequestHandler<GetSalesmanOutletsQuery, List<SalesmanDailyPlansDto>>
 {

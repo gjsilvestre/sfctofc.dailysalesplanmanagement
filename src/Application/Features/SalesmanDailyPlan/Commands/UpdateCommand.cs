@@ -19,7 +19,7 @@ public class UpdateTargetSalesCommand : IRequest<Result>
 
 public class UpdateTargetSalesCommandHandler : IRequestHandler<UpdateTargetSalesCommand, Result>
 {
-    private readonly IApplicationDbContext _context; // Use the correct interface
+    private readonly IApplicationDbContext _context;
 
     public UpdateTargetSalesCommandHandler(IApplicationDbContext context)
     {
@@ -40,8 +40,8 @@ public class UpdateTargetSalesCommandHandler : IRequestHandler<UpdateTargetSales
 
         try
         {
-            await _context.SaveChangesAsync(cancellationToken); // Correct context variable
-            return Result.Success(); // Adjust based on your Result class
+            await _context.SaveChangesAsync(cancellationToken); 
+            return Result.Success(); 
         }
         catch (Exception ex)
         {
